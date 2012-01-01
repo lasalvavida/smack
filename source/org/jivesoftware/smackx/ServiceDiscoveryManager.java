@@ -26,7 +26,11 @@ import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.XMPPError;
+import org.jivesoftware.smackx.entitycaps.CapsPresenceRenewer;
+import org.jivesoftware.smackx.entitycaps.EntityCapsManager;
+import org.jivesoftware.smackx.packet.CapsExtension;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.jivesoftware.smackx.packet.DiscoverItems;
 import org.jivesoftware.smackx.packet.DataForm;
@@ -49,6 +53,12 @@ public class ServiceDiscoveryManager {
 
     private static String identityName = "Smack";
     private static String identityType = "pc";
+
+    private static boolean cacheNonCaps = true;
+
+    private Map<String,DiscoverInfo> nonCapsCache = new ConcurrentHashMap<String,DiscoverInfo>();
+
+    private EntityCapsManager capsManager;
 
     private static Map<Connection, ServiceDiscoveryManager> instances =
             new ConcurrentHashMap<Connection, ServiceDiscoveryManager>();
@@ -77,6 +87,15 @@ public class ServiceDiscoveryManager {
      */
     public ServiceDiscoveryManager(Connection connection) {
         this.connection = connection;
+
+        if (connection instanceof XMPPConnection
+                && ((XMPPConnection) connection).isEntityCapsEnabled()) {
+            EntityCapsManager capsManager = new EntityCapsManager(this);
+            setEntityCapsManager(capsManager);
+            capsManager.addCapsVerListener(new CapsPresenceRenewer(connection, capsManager));
+        }
+
+        renewEntityCapsVersion();
         init();
     }
 
@@ -137,6 +156,46 @@ public class ServiceDiscoveryManager {
     }
 
     /**
+     * Enables caching of non caps entities to reduce traffic. If enabled discover infos of 
+     * entities without xep-0115 are store in a String,DiscoverInfo map and
+     * discoverInfo(String) queries this map before sending a real discover info to the
+     * remote entity. Enabled by default.
+     */
+    public static void setNonCapsCaching(boolean set){
+        cacheNonCaps = set;
+    }
+
+    /**
+     * Check if caching of non caps entities is enabled
+     */
+
+    public static boolean isNonCapsCachingEnabled(){
+        return cacheNonCaps;
+    }
+
+    /**
+     * Add discover info response data.
+     *
+     * @param response the discover info response packet
+     */
+    public void addDiscoverInfoTo(DiscoverInfo response) {
+        // Set this client identity
+        DiscoverInfo.Identity identity = new DiscoverInfo.Identity("client",
+                getIdentityName());
+        identity.setType(getIdentityType());
+        response.addIdentity(identity);
+        // Add the registered features to the response
+        synchronized (features) {
+            for (Iterator<String> it = getFeatures(); it.hasNext();) {
+                response.addFeature(it.next());
+            }
+            if (extendedInfo != null) {
+                response.addExtension(extendedInfo);
+            }
+        }
+    }
+
+    /**
      * Initializes the packet listeners of the connection that will answer to any
      * service discovery request. 
      */
@@ -167,6 +226,21 @@ public class ServiceDiscoveryManager {
                 // ignore
             }
         });
+
+        // Intercept presence packages and add caps data when intended.
+        // XEP-0115 specifies that a client SHOULD include entity capabilities
+        // with every presence notification it sends.
+        PacketFilter capsPacketFilter = new PacketTypeFilter(Presence.class);
+        PacketInterceptor packetInterceptor = new PacketInterceptor() {
+            public void interceptPacket(Packet packet) {
+                if (capsManager != null) {
+                    String ver = getEntityCapsVersion();
+                    CapsExtension caps = new CapsExtension(capsManager.getNode(), ver, "sha-1");
+                    packet.addExtension(caps);
+                }
+            }
+        };
+        connection.addPacketInterceptor(packetInterceptor, capsPacketFilter);
 
         // Listen for disco#items requests and answer with an empty result        
         PacketFilter packetFilter = new PacketTypeFilter(DiscoverItems.class);
@@ -218,22 +292,13 @@ public class ServiceDiscoveryManager {
                     response.setTo(discoverInfo.getFrom());
                     response.setPacketID(discoverInfo.getPacketID());
                     response.setNode(discoverInfo.getNode());
-                     // Add the client's identity and features only if "node" is null
-                    if (discoverInfo.getNode() == null) {
-                        // Set this client identity
-                        DiscoverInfo.Identity identity = new DiscoverInfo.Identity("client",
-                                getIdentityName());
-                        identity.setType(getIdentityType());
-                        response.addIdentity(identity);
-                        // Add the registered features to the response
-                        synchronized (features) {
-                            for (Iterator<String> it = getFeatures(); it.hasNext();) {
-                                response.addFeature(it.next());
-                            }
-                            if (extendedInfo != null) {
-                                response.addExtension(extendedInfo);
-                            }
-                        }
+                    // Add the client's identity and features if "node" is
+                    // null or our entity caps version.
+                    if (discoverInfo.getNode() == null || 
+                            capsManager == null ||
+                             (capsManager.getNode() + "#" +
+                              getEntityCapsVersion()).equals(discoverInfo.getNode())) {
+                        addDiscoverInfoTo(response);
                     }
                     else {
                         // Disco#info was sent to a node. Check if we have information of the
@@ -344,6 +409,7 @@ public class ServiceDiscoveryManager {
     public void addFeature(String feature) {
         synchronized (features) {
             features.add(feature);
+            renewEntityCapsVersion();
         }
     }
 
@@ -358,6 +424,7 @@ public class ServiceDiscoveryManager {
     public void removeFeature(String feature) {
         synchronized (features) {
             features.remove(feature);
+            renewEntityCapsVersion();
         }
     }
 
@@ -390,6 +457,7 @@ public class ServiceDiscoveryManager {
      */
     public void setExtendedInfo(DataForm info) {
       extendedInfo = info;
+      renewEntityCapsVersion();
     }
 
     /**
@@ -401,6 +469,29 @@ public class ServiceDiscoveryManager {
      */
     public void removeExtendedInfo() {
        extendedInfo = null;
+       renewEntityCapsVersion();
+    }
+
+    /**
+     * Returns the discovered information of a given XMPP entity addressed by its JID
+     * if it's known by the entity caps manager.
+     *
+     * @param entityID the address of the XMPP entity
+     * @return the disovered info or null if no such info is available from the
+     * entity caps manager.
+     * @throws XMPPException if the operation failed for some reason.
+     */
+    public DiscoverInfo discoverInfoByCaps(String entityID) throws XMPPException {
+        DiscoverInfo info = capsManager.getDiscoverInfoByUser(entityID);
+
+        if (info != null) {
+            DiscoverInfo newInfo = info.clone();
+            newInfo.setFrom(entityID);
+            return newInfo;
+        }
+        else {
+            return null;
+        }
     }
 
     /**
@@ -411,7 +502,39 @@ public class ServiceDiscoveryManager {
      * @throws XMPPException if the operation failed for some reason.
      */
     public DiscoverInfo discoverInfo(String entityID) throws XMPPException {
-        return discoverInfo(entityID, null);
+        // Check if the have it cached in the Entity Capabilities Manager
+        DiscoverInfo info = discoverInfoByCaps(entityID);
+
+        if (info != null) {
+            return info;
+        } else {
+            // If the caps node is known, use it in the request.
+            String node = null;
+
+            if (capsManager != null) {
+                // Get the newest node#version
+                node = capsManager.getNodeVersionByUser(entityID);
+            }
+
+                        // Check if we cached DiscoverInfo for nonCaps entity
+                        if (cacheNonCaps
+                                        && node == null
+                                        && nonCapsCache.containsKey(entityID)) {
+                                return nonCapsCache.get(entityID);
+                        }
+            // Discover by requesting from the remote client
+            info = discoverInfo(entityID, node);
+
+            // If the node version is known, store the new entry.
+            if (node != null && capsManager != null) {
+                EntityCapsManager.addDiscoverInfoByNode(node, info);
+            }
+            // If this is a non caps entity store the discover in nonCapsCache map
+            else if (cacheNonCaps && node == null) {
+                nonCapsCache.put(entityID, info);
+            }
+            return info;
+        }
     }
 
     /**
@@ -509,8 +632,21 @@ public class ServiceDiscoveryManager {
      */
     public boolean canPublishItems(String entityID) throws XMPPException {
         DiscoverInfo info = discoverInfo(entityID);
-        return info.containsFeature("http://jabber.org/protocol/disco#publish");
-    }
+        return canPublishItems(info);
+     }
+
+     /**
+      * Returns true if the server supports publishing of items. A client may wish to publish items
+      * to the server so that the server can provide items associated to the client. These items will
+      * be returned by the server whenever the server receives a disco request targeted to the bare
+      * address of the client (i.e. user@host.com).
+      * 
+      * @param DiscoverInfo the discover info packet to check.
+      * @return true if the server supports publishing of items.
+      */
+     public static boolean canPublishItems(DiscoverInfo info) {
+         return info.containsFeature("http://jabber.org/protocol/disco#publish");
+     }
 
     /**
      * Publishes new items to a parent entity. The item elements to publish MUST have at least 
@@ -560,5 +696,47 @@ public class ServiceDiscoveryManager {
         if (result.getType() == IQ.Type.ERROR) {
             throw new XMPPException(result.getError());
         }
+    }
+
+    /**
+     * Entity Capabilities
+     */
+
+    public void setEntityCapsManager(EntityCapsManager manager) {
+        capsManager = manager;
+        if (connection.getServiceCapsNode() != null
+                        && connection.getServiceName() != null) {
+                capsManager.addUserCapsNode(connection.getServiceName(), connection.getServiceCapsNode());
+        }
+        capsManager.addPacketListener(connection);
+    }
+
+    /**
+     * Updates the Entity Capabilities Verification String
+     * if EntityCaps is enabled
+     */
+    private void renewEntityCapsVersion() {
+        // If a XMPPConnection is the managed one, see that the new
+        // version is updated
+        if (connection instanceof XMPPConnection) {
+            if (capsManager != null) {
+                capsManager.calculateEntityCapsVersion(capsManager.getOwnDiscoverInfo(),
+                        identityType, identityName, extendedInfo);
+                //capsManager.notifyCapsVerListeners();
+            }
+        }
+    }
+
+    public String getEntityCapsVersion() {
+        if (capsManager != null) {
+            return capsManager.getCapsVersion();
+        }
+        else {
+            return null;
+        }
+    }
+
+    public EntityCapsManager getEntityCapsManager(){
+        return capsManager;
     }
 }

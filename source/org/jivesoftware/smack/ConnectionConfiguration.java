@@ -61,6 +61,8 @@ public class ConnectionConfiguration implements Cloneable {
     private boolean notMatchingDomainCheckEnabled = false;
 
     private boolean compressionEnabled = false;
+    private boolean enableEntityCaps = false;
+    private String serviceCapsNode = null;
 
     private boolean saslAuthenticationEnabled = true;
     /**
@@ -721,4 +723,31 @@ public class ConnectionConfiguration implements Cloneable {
         this.password = password;
         this.resource = resource;
     }
+
+    boolean isEntityCapsEnabled() {
+        return enableEntityCaps;
+    }
+
+    /**
+     * Enable or disable Entity Capabilities (XEP-115)
+     * http://xmpp.org/extensions/xep-0115.html
+     *
+     * Only available with XMPPConnections
+     *
+     * Default is disabled
+     *
+     * @param enabled
+     */
+    void setEntityCaps(boolean enabled) {
+        enableEntityCaps = enabled;
+    }
+    
+    void setServiceCapsNode(String node){
+        serviceCapsNode = node;
+    }
+    
+    String getServiceCapsNode(){
+        return serviceCapsNode;
+    }
+
 }

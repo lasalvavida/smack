@@ -232,6 +232,10 @@ public abstract class Connection {
         return config.getHost();
     }
 
+    public String getServiceCapsNode() {
+        return config.getServiceCapsNode();
+    }
+
     /**
      * Returns the port number of the XMPP server for this connection. The default port
      * for normal connections is 5222. The default port for SSL connections is 5223.
@@ -695,6 +699,10 @@ public abstract class Connection {
      */
     protected Map<PacketInterceptor, InterceptorWrapper> getPacketInterceptors() {
         return interceptors;
+    }
+
+    public boolean isSendPresence() {
+        return config.isSendPresence();
     }
 
     /**
