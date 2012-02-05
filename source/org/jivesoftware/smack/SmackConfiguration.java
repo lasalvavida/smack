@@ -54,6 +54,8 @@ public final class SmackConfiguration {
     private static int localSocks5ProxyPort = 7777;
     private static int packetCollectorSize = 5000;
 
+    private static boolean dnsSecEnabled = false;
+
     private SmackConfiguration() {
     }
 
@@ -297,6 +299,24 @@ public final class SmackConfiguration {
      */
     public static void setLocalSocks5ProxyPort(int localSocks5ProxyPort) {
         SmackConfiguration.localSocks5ProxyPort = localSocks5ProxyPort;
+    }
+
+    /**
+     * Sets whether or not to verify the DNSSEC signatures of host names.
+     * 
+     * @param dnsSecEnabled Whether or not to use DNSSEC.
+     */
+    public static void setDnsSecEnabled(boolean dnsSecEnabled) {
+        SmackConfiguration.dnsSecEnabled = dnsSecEnabled;
+    }
+
+    /**
+     * Returns whether or not to verify the DNSSEC signatures of host names.
+     * 
+     * @return Whether or not to use DNSSEC.
+     */
+    public static boolean isDnsSecEnabled() {
+        return dnsSecEnabled;
     }
 
     private static void parseClassToLoad(XmlPullParser parser) throws Exception {

@@ -1,6 +1,8 @@
 package org.jivesoftware.smack.proxy;
 
 import javax.net.SocketFactory;
+import org.jivesoftware.smack.SmackConfiguration;
+import org.littleshoot.dnssec4j.VerifiedSocketFactory;
 
 /**
  * Class which stores proxy information such as proxy type, host, port, 
@@ -87,28 +89,34 @@ public class ProxyInfo
     {
         return proxyPassword;
     }
-    
+
     public SocketFactory getSocketFactory()
     {
+        final SocketFactory sf;
         if(proxyType == ProxyType.NONE)
         {
-            return new DirectSocketFactory();
+            sf = new DirectSocketFactory();
         }
         else if(proxyType == ProxyType.HTTP)
         {
-            return new HTTPProxySocketFactory(this);
+            sf = new HTTPProxySocketFactory(this);
         }
         else if(proxyType == ProxyType.SOCKS4)
         {
-            return new Socks4ProxySocketFactory(this);
+            sf = new Socks4ProxySocketFactory(this);
         }
         else if(proxyType == ProxyType.SOCKS5)
         {
-            return new Socks5ProxySocketFactory(this);
+            sf = new Socks5ProxySocketFactory(this);
         }
         else
         {
             return null;
+        }
+        if (SmackConfiguration.isDnsSecEnabled()) {
+            return new VerifiedSocketFactory(sf);
+        } else {
+            return sf;
         }
     }
 }
