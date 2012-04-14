@@ -315,6 +315,14 @@ class PacketReader {
                         // to be sent by the server
                         resetParser();
                     }
+                    else {
+                        try {
+                            UnknownPacket packet = (UnknownPacket) PacketParserUtils.parsePacketExtension(parser.getName(), parser.getNamespace(), parser);
+                            processPacket(packet);
+                        } catch (ClassCastException ex) {
+                            // ignore
+                        }
+                    }
                 }
                 else if (eventType == XmlPullParser.END_TAG) {
                     if (parser.getName().equals("stream")) {
@@ -394,10 +402,10 @@ class PacketReader {
                 	connection.getConfiguration().setRosterVersioningAvailable(true);
                 }
                 else if(parser.getName().equals("c")){
-                	String node = parser.getAttributeValue(null, "node");
-                	String ver = parser.getAttributeValue(null, "ver");
-                	String capsNode = node+"#"+ver;
-                	connection.getConfiguration().setCapsNode(capsNode);
+                    String node = parser.getAttributeValue(null, "node");
+                    String ver = parser.getAttributeValue(null, "ver");
+                    String capsNode = node+"#"+ver;
+                    connection.getConfiguration().setCapsNode(capsNode);
                 }
                 else if (parser.getName().equals("session")) {
                     // The server supports sessions
@@ -409,6 +417,14 @@ class PacketReader {
                 }
                 else if (parser.getName().equals("register")) {
                     connection.getAccountManager().setSupportsAccountCreation(true);
+                }
+                else {
+                    try {
+                        UnknownPacket packet = (UnknownPacket) PacketParserUtils.parsePacketExtension(parser.getName(), parser.getNamespace(), parser);
+                        processPacket(packet);
+                    } catch (ClassCastException ex) {
+                        // ignore
+                    }
                 }
             }
             else if (eventType == XmlPullParser.END_TAG) {
