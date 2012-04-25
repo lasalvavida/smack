@@ -11,8 +11,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.jivesoftware.smackx.entitycaps;
 
-public interface CapsVerListener {
-    public void capsVerUpdated(String capsVer);
+import org.jivesoftware.smack.util.Base64;
+
+/**
+ * @author Florian Schmaus
+ */
+public class Base64Encoder implements StringEncoder {
+
+    public String encode(String s) {
+        return Base64.encodeBytes(s.getBytes());
+    }
+
+    public String decode(String s) {
+        return new String(Base64.decode(s));
+    }
+    
 }

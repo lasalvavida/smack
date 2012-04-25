@@ -11,8 +11,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * @author Florian Schmaus
+ */
 package org.jivesoftware.smackx.entitycaps;
 
-public interface CapsVerListener {
-    public void capsVerUpdated(String capsVer);
+public interface StringEncoder {
+    /**
+     * Encodes an string to another representation
+     * 
+     * @param string
+     * @return
+     */
+    public String encode(String string);
+    
+    /**
+     * Decodes an string back to it's initial representation
+     * 
+     * @param string
+     * @return
+     */
+    public String decode(String string);
 }
