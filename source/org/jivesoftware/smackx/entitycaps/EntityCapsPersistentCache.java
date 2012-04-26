@@ -13,6 +13,8 @@
  */
 package org.jivesoftware.smackx.entitycaps;
 
+import java.io.IOException;
+
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 
 public interface EntityCapsPersistentCache {
@@ -27,7 +29,7 @@ public interface EntityCapsPersistentCache {
     /**
      * Replay the Caches data into EntityCapsManager
      */
-    abstract void replay();
+    abstract void replay() throws IOException;
 
     /**
      * Empty the Cache

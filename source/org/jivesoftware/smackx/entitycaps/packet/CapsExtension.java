@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2009 Jonas Ådahl.
  * Copyright 2011 Florian Schmaus
  *
@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.jivesoftware.smackx.packet;
+package org.jivesoftware.smackx.entitycaps.packet;
 
 import org.jivesoftware.smack.packet.PacketExtension;
 

@@ -30,7 +30,7 @@ import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smackx.entitycaps.CapsPresenceRenewer;
 import org.jivesoftware.smackx.entitycaps.EntityCapsManager;
-import org.jivesoftware.smackx.packet.CapsExtension;
+import org.jivesoftware.smackx.entitycaps.packet.CapsExtension;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.jivesoftware.smackx.packet.DiscoverItems;
 import org.jivesoftware.smackx.packet.DataForm;
@@ -92,7 +92,7 @@ public class ServiceDiscoveryManager {
                 && ((XMPPConnection) connection).isEntityCapsEnabled()) {
             EntityCapsManager capsManager = new EntityCapsManager(this);
             setEntityCapsManager(capsManager);
-            capsManager.addCapsVerListener(new CapsPresenceRenewer(connection, capsManager));
+            capsManager.addCapsVerListener(new CapsPresenceRenewer((XMPPConnection) connection, capsManager));
         }
 
         renewEntityCapsVersion();

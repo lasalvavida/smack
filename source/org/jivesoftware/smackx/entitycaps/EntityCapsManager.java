@@ -28,9 +28,9 @@ import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.Base64;
 import org.jivesoftware.smackx.FormField;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
+import org.jivesoftware.smackx.entitycaps.packet.CapsExtension;
 import org.jivesoftware.smackx.provider.CapsExtensionProvider;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
-import org.jivesoftware.smackx.packet.CapsExtension;
 import org.jivesoftware.smackx.packet.DataForm;
 import org.jivesoftware.smackx.packet.DiscoverInfo.Feature;
 
@@ -42,6 +42,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -307,7 +308,6 @@ public class EntityCapsManager {
             }
         }
 
-
         setCurrentCapsVersion(discoverInfo, capsToHash(s));
     }
 
@@ -322,7 +322,13 @@ public class EntityCapsManager {
         notifyCapsVerListeners();
     }
     
-    public static void setPersistentCache(EntityCapsPersistentCache cache) {
+    /**
+     * Set the persistent cache implementation
+     * 
+     * @param cache
+     * @throws IOException
+     */
+    public static void setPersistentCache(EntityCapsPersistentCache cache) throws IOException {
         if (persistentCache != null)
             throw new IllegalStateException("Entity Caps Persistent Cache was already set");
         persistentCache = cache;

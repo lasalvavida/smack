@@ -83,17 +83,11 @@ public class SimpleDirectoryPersistentCache implements
     }
 
     @Override
-    public void replay() {
+    public void replay() throws IOException {
         File[] files = cacheDir.listFiles();
         for (File f : files) {
             String node = stringEncoder.decode(f.getName());
-            DiscoverInfo info;
-            try {
-                info = restoreInfoFromFile(f);
-            } catch (IOException e) {
-                e.printStackTrace();
-                continue;
-            }
+            DiscoverInfo info = restoreInfoFromFile(f);
             if (info == null)
                 continue;
 
