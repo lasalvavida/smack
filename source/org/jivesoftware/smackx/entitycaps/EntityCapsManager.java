@@ -343,7 +343,7 @@ public class EntityCapsManager {
     public DiscoverInfo getOwnDiscoverInfo() {
         DiscoverInfo di = new DiscoverInfo();
         di.setType(IQ.Type.RESULT);
-        di.setNode(getNode() + "#" + sdm.getEntityCapsVersion());
+        di.setNode(getNode() + "#" + getCapsVersion());
 
         // Add discover info
         sdm.addDiscoverInfoTo(di);
