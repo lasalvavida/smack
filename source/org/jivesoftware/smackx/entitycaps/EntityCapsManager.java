@@ -68,7 +68,7 @@ public class EntityCapsManager {
      */
     private static Map<String,DiscoverInfo> caps =
         new ConcurrentHashMap<String,DiscoverInfo>();
-    
+
     /**
      * Map of Full JID -&gt; DiscoverInfo/null.
      * In case of c2s connection the key is formed as user@server/resource (resource is required)
@@ -76,7 +76,7 @@ public class EntityCapsManager {
      * In case of a server or component the key is formed as domain
      */
     private Map<String,String> userCaps =
-        new ConcurrentHashMap<String,String>(); 
+        new ConcurrentHashMap<String,String>();
 
     // CapsVerListeners gets notified when the version string is changed.
     private Set<CapsVerListener> capsVerListeners =
@@ -108,7 +108,7 @@ public class EntityCapsManager {
     public EntityCapsManager(ServiceDiscoveryManager sdm) {
         // Add Entity Capabilities (XEP-0115) feature node.
         sdm.addFeature("http://jabber.org/protocol/caps");
-        
+
         this.sdm = sdm;
     }
 
@@ -314,7 +314,7 @@ public class EntityCapsManager {
         addDiscoverInfoByNode(getNode() + "#" + capsVersion, discoverInfo);
         notifyCapsVerListeners();
     }
-    
+
     /**
      * Set the persistent cache implementation
      * 
@@ -327,7 +327,7 @@ public class EntityCapsManager {
         persistentCache = cache;
         persistentCache.replay();
     }
-    
+
     /**
      * Get a DiscoverInfo for the current entity caps node.
      *
@@ -343,7 +343,7 @@ public class EntityCapsManager {
 
         return di;
     }
-    
+
     @SuppressWarnings("unused")
     private void setSendPresence() {
         sendPresence = true;

@@ -741,11 +741,11 @@ public class ConnectionConfiguration implements Cloneable {
     void setEntityCaps(boolean enabled) {
         enableEntityCaps = enabled;
     }
-    
+
     void setServiceCapsNode(String node){
         serviceCapsNode = node;
     }
-    
+
     String getServiceCapsNode(){
         return serviceCapsNode;
     }

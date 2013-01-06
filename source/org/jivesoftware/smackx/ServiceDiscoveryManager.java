@@ -294,7 +294,7 @@ public class ServiceDiscoveryManager {
                     response.setNode(discoverInfo.getNode());
                     // Add the client's identity and features if "node" is
                     // null or our entity caps version.
-                    if (discoverInfo.getNode() == null || 
+                    if (discoverInfo.getNode() == null ||
                             capsManager == null ||
                              (capsManager.getNode() + "#" +
                               getEntityCapsVersion()).equals(discoverInfo.getNode())) {
