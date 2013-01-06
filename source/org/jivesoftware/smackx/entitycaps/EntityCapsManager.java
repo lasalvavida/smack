@@ -52,13 +52,15 @@ import java.security.NoSuchAlgorithmException;
  */
 public class EntityCapsManager {
 
+    public static final String NAMESPACE = "http://jabber.org/protocol/caps";
+    public static final String ELEMENT = "c";
+
     public static final String HASH_METHOD = "sha-1";
     public static final String HASH_METHOD_CAPS = "SHA-1";
 
-    // TODO entityNode should become a constant (final)
-    private static String entityNode = "http://www.igniterealtime.org/projects/smack/";
+    private static final String entityNode = "http://www.igniterealtime.org/projects/smack/";
     private static EntityCapsPersistentCache persistentCache;
-    
+
     private ServiceDiscoveryManager sdm;
 
     /**
@@ -84,8 +86,8 @@ public class EntityCapsManager {
     private boolean sendPresence;
 
     static {
-        ProviderManager.getInstance().addExtensionProvider(CapsExtension.NODE_NAME,
-                CapsExtension.XMLNS, new CapsExtensionProvider());
+        ProviderManager.getInstance().addExtensionProvider(ELEMENT,
+                NAMESPACE, new CapsExtensionProvider());
     }
 
     /**
@@ -177,15 +179,6 @@ public class EntityCapsManager {
     }
 
     /**
-     * Set our own entity node.
-     *
-     * @param node the new node
-     */
-    public void setNode(String node) {
-        entityNode = node;
-    }
-
-    /**
      * Retrieve DiscoverInfo for a specific node.
      *
      * @param node The node name.
@@ -205,7 +198,7 @@ public class EntityCapsManager {
         PacketFilter f =
             new AndFilter(
                     new PacketTypeFilter(Presence.class),
-                    new PacketExtensionFilter(CapsExtension.NODE_NAME, CapsExtension.XMLNS));
+                    new PacketExtensionFilter(ELEMENT, NAMESPACE));
         connection.addPacketListener(new CapsPacketListener(this), f);
     }
 

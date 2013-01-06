@@ -18,12 +18,11 @@
 package org.jivesoftware.smackx.entitycaps.packet;
 
 import org.jivesoftware.smack.packet.PacketExtension;
+import org.jivesoftware.smackx.entitycaps.EntityCapsManager;
 
 public class CapsExtension implements PacketExtension {
 
     private String node, ver, hash;
-    public static final String XMLNS = "http://jabber.org/protocol/caps";
-    public static final String NODE_NAME = "c";
 
     public CapsExtension() {
     }
@@ -35,11 +34,11 @@ public class CapsExtension implements PacketExtension {
     }
 
     public String getElementName() {
-        return NODE_NAME;
+        return EntityCapsManager.ELEMENT;
     }
 
     public String getNamespace() {
-        return XMLNS;
+        return EntityCapsManager.NAMESPACE;
     }
 
     public String getNode() {
@@ -74,7 +73,7 @@ public class CapsExtension implements PacketExtension {
      *
      */
     public String toXML() {
-        String xml = "<c xmlns='" + XMLNS + "' " +
+        String xml = "<c xmlns='" + EntityCapsManager.NAMESPACE + "' " +
             "hash='" + hash + "' " +
             "node='" + node + "' " +
             "ver='" + ver + "'/>";

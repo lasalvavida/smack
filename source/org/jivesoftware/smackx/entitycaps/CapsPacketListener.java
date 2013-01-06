@@ -15,6 +15,7 @@ package org.jivesoftware.smackx.entitycaps;
 
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smackx.entitycaps.EntityCapsManager;
 import org.jivesoftware.smackx.entitycaps.packet.CapsExtension;
 
 class CapsPacketListener implements PacketListener {
@@ -27,7 +28,7 @@ class CapsPacketListener implements PacketListener {
 
     public void processPacket(Packet packet) {
         CapsExtension ext = (CapsExtension) packet.getExtension(
-                CapsExtension.NODE_NAME, CapsExtension.XMLNS);
+                EntityCapsManager.ELEMENT, EntityCapsManager.NAMESPACE);
 
         String nodeVer = ext.getNode() + "#" + ext.getVer();
         String user = packet.getFrom();
