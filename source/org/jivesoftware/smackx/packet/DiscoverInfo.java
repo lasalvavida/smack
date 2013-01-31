@@ -22,6 +22,7 @@ package org.jivesoftware.smackx.packet;
 
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.PacketExtension;
+import org.jivesoftware.smack.util.StringUtils;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -136,7 +137,7 @@ public class DiscoverInfo extends IQ {
         buf.append("<query xmlns=\"http://jabber.org/protocol/disco#info\"");
         if (getNode() != null) {
             buf.append(" node=\"");
-            buf.append(getNode());
+            buf.append(StringUtils.escapeForXML(getNode()));
             buf.append("\"");
         }
         buf.append(">");
@@ -251,10 +252,10 @@ public class DiscoverInfo extends IQ {
 
         public String toXML() {
             StringBuilder buf = new StringBuilder();
-            buf.append("<identity category=\"").append(category).append("\"");
-            buf.append(" name=\"").append(name).append("\"");
+            buf.append("<identity category=\"").append(StringUtils.escapeForXML(category)).append("\"");
+            buf.append(" name=\"").append(StringUtils.escapeForXML(name)).append("\"");
             if (type != null) {
-                buf.append(" type=\"").append(type).append("\"");
+                buf.append(" type=\"").append(StringUtils.escapeForXML(type)).append("\"");
             }
             buf.append("/>");
             return buf.toString();
@@ -291,7 +292,7 @@ public class DiscoverInfo extends IQ {
 
         public String toXML() {
             StringBuilder buf = new StringBuilder();
-            buf.append("<feature var=\"").append(variable).append("\"/>");
+            buf.append("<feature var=\"").append(StringUtils.escapeForXML(variable)).append("\"/>");
             return buf.toString();
         }
     }
