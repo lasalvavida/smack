@@ -59,6 +59,8 @@ public final class SmackConfiguration {
     private static int packetCollectorSize = 5000;
 
     private static int defaultPingInterval = 1800000; // 30 min (30*60*1000)
+    
+    private static boolean autoEnableEntityCaps = false;
 
     private SmackConfiguration() {
     }
@@ -314,6 +316,10 @@ public final class SmackConfiguration {
 
     public static void setDefaultPingInterval(int defaultPingInterval) {
         SmackConfiguration.defaultPingInterval = defaultPingInterval;
+    }
+    
+    public static boolean autoEnableEntityCaps() {
+        return autoEnableEntityCaps;
     }
 
     private static void parseClassToLoad(XmlPullParser parser) throws Exception {

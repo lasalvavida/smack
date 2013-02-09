@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.jivesoftware.smackx.entitycaps;
+package org.jivesoftware.smackx.entitycaps.cache;
 
 
 import java.io.DataInputStream;
@@ -28,6 +28,9 @@ import java.io.StringReader;
 
 import org.jivesoftware.smack.provider.IQProvider;
 import org.jivesoftware.smack.provider.ProviderManager;
+import org.jivesoftware.smackx.entitycaps.Base64Encoder;
+import org.jivesoftware.smackx.entitycaps.EntityCapsManager;
+import org.jivesoftware.smackx.entitycaps.StringEncoder;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;

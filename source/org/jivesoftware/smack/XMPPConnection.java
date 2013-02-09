@@ -1017,13 +1017,4 @@ public class XMPPConnection extends Connection {
             this.wasAuthenticated = wasAuthenticated;
         }
     }
-
-    /**
-     * Check if  Entity Capabilities (XEP-115) are enabled for this connection
-     *
-     * @return true if Entity Capabilities are enabled, otherwise false
-     */
-    public boolean isEntityCapsEnabled() {
-        return config.isEntityCapsEnabled();
-    }
 }

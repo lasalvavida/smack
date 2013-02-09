@@ -26,11 +26,8 @@ import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
-import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.XMPPError;
-import org.jivesoftware.smackx.entitycaps.CapsPresenceRenewer;
 import org.jivesoftware.smackx.entitycaps.EntityCapsManager;
-import org.jivesoftware.smackx.entitycaps.packet.CapsExtension;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.jivesoftware.smackx.packet.DiscoverItems;
 import org.jivesoftware.smackx.packet.DataForm;
@@ -87,13 +84,6 @@ public class ServiceDiscoveryManager {
      */
     public ServiceDiscoveryManager(Connection connection) {
         this.connection = connection;
-
-        if (connection instanceof XMPPConnection
-                && ((XMPPConnection) connection).isEntityCapsEnabled()) {
-            EntityCapsManager capsManager = new EntityCapsManager(this);
-            setEntityCapsManager(capsManager);
-            capsManager.addCapsVerListener(new CapsPresenceRenewer((XMPPConnection) connection, capsManager));
-        }
 
         renewEntityCapsVersion();
         init();
@@ -227,21 +217,6 @@ public class ServiceDiscoveryManager {
             }
         });
 
-        // Intercept presence packages and add caps data when intended.
-        // XEP-0115 specifies that a client SHOULD include entity capabilities
-        // with every presence notification it sends.
-        PacketFilter capsPacketFilter = new PacketTypeFilter(Presence.class);
-        PacketInterceptor packetInterceptor = new PacketInterceptor() {
-            public void interceptPacket(Packet packet) {
-                if (capsManager != null) {
-                    String ver = getEntityCapsVersion();
-                    CapsExtension caps = new CapsExtension(capsManager.getNode(), ver, "sha-1");
-                    packet.addExtension(caps);
-                }
-            }
-        };
-        connection.addPacketInterceptor(packetInterceptor, capsPacketFilter);
-
         // Listen for disco#items requests and answer with an empty result        
         PacketFilter packetFilter = new PacketTypeFilter(DiscoverItems.class);
         PacketListener packetListener = new PacketListener() {
@@ -292,12 +267,12 @@ public class ServiceDiscoveryManager {
                     response.setTo(discoverInfo.getFrom());
                     response.setPacketID(discoverInfo.getPacketID());
                     response.setNode(discoverInfo.getNode());
+
                     // Add the client's identity and features if "node" is
-                    // null or our entity caps version.
-                    if (discoverInfo.getNode() == null ||
-                            capsManager == null ||
-                             (capsManager.getNode() + "#" +
-                              getEntityCapsVersion()).equals(discoverInfo.getNode())) {
+                    // null, or the capsManager or our entity caps version equals the one received.
+                    if (capsManager != null 
+                            && (capsManager.getNode() + "#" + getEntityCapsVersion()).equals(discoverInfo.getNode())) {
+                        // See http://xmpp.org/extensions/xep-0115.html#discover
                         addDiscoverInfoTo(response);
                     }
                     else {
@@ -306,7 +281,7 @@ public class ServiceDiscoveryManager {
                         NodeInformationProvider nodeInformationProvider =
                                 getNodeInformationProvider(discoverInfo.getNode());
                         if (nodeInformationProvider != null) {
-                            // Node was found. Add node features
+                            // Specified node was found
                             List<String> features = nodeInformationProvider.getNodeFeatures();
                             if (features != null) {
                                 for(String feature : features) {
@@ -323,7 +298,8 @@ public class ServiceDiscoveryManager {
                             }
                         }
                         else {
-                            // Return <item-not-found/> error since specified node was not found
+                            // Return <item-not-found/> error since client doesn't contain
+                            // the specified node
                             response.setType(IQ.Type.ERROR);
                             response.setError(new XMPPError(XMPPError.Condition.item_not_found));
                         }
@@ -459,6 +435,10 @@ public class ServiceDiscoveryManager {
       extendedInfo = info;
       renewEntityCapsVersion();
     }
+    
+    public DataForm getExtendedInfo() {
+        return extendedInfo;
+    }
 
     /**
      * Removes the dataform containing extended service discovery information
@@ -473,28 +453,6 @@ public class ServiceDiscoveryManager {
     }
 
     /**
-     * Returns the discovered information of a given XMPP entity addressed by its JID
-     * if it's known by the entity caps manager.
-     *
-     * @param entityID the address of the XMPP entity
-     * @return the disovered info or null if no such info is available from the
-     * entity caps manager.
-     * @throws XMPPException if the operation failed for some reason.
-     */
-    public DiscoverInfo discoverInfoByCaps(String entityID) throws XMPPException {
-        DiscoverInfo info = capsManager.getDiscoverInfoByUser(entityID);
-
-        if (info != null) {
-            DiscoverInfo newInfo = info.clone();
-            newInfo.setFrom(entityID);
-            return newInfo;
-        }
-        else {
-            return null;
-        }
-    }
-
-    /**
      * Returns the discovered information of a given XMPP entity addressed by its JID.
      * 
      * @param entityID the address of the XMPP entity.
@@ -503,34 +461,31 @@ public class ServiceDiscoveryManager {
      */
     public DiscoverInfo discoverInfo(String entityID) throws XMPPException {
         // Check if the have it cached in the Entity Capabilities Manager
-        DiscoverInfo info = discoverInfoByCaps(entityID);
+        DiscoverInfo info = EntityCapsManager.discoverInfoByCaps(entityID);
 
         if (info != null) {
+            // We were able to retrieve the information from Entity Caps and avoided a disco request
             return info;
         } else {
             // If the caps node is known, use it in the request.
-            String node = null;
+            String capsNode = null;
 
-            if (capsManager != null) {
-                // Get the newest node#version
-                node = capsManager.getNodeVersionByUser(entityID);
+            // Get the newest node#version
+            capsNode = EntityCapsManager.getNodeVersionByUser(entityID);
+
+            // Check if we cached DiscoverInfo for nonCaps entity
+            if (cacheNonCaps && capsNode == null && nonCapsCache.containsKey(entityID)) {
+                return nonCapsCache.get(entityID);
             }
-
-                        // Check if we cached DiscoverInfo for nonCaps entity
-                        if (cacheNonCaps
-                                        && node == null
-                                        && nonCapsCache.containsKey(entityID)) {
-                                return nonCapsCache.get(entityID);
-                        }
             // Discover by requesting from the remote client
-            info = discoverInfo(entityID, node);
+            info = discoverInfo(entityID, capsNode);
 
             // If the node version is known, store the new entry.
-            if (node != null && capsManager != null) {
-                EntityCapsManager.addDiscoverInfoByNode(node, info);
+            if (capsNode != null) {
+                EntityCapsManager.addDiscoverInfoByNode(capsNode, info);
             }
             // If this is a non caps entity store the discover in nonCapsCache map
-            else if (cacheNonCaps && node == null) {
+            else if (cacheNonCaps && capsNode == null) {
                 nonCapsCache.put(entityID, info);
             }
             return info;
@@ -542,8 +497,11 @@ public class ServiceDiscoveryManager {
      * note attribute. Use this message only when trying to query information which is not 
      * directly addressable.
      * 
+     * @see <a href="http://xmpp.org/extensions/xep-0030.html#info-basic">XEP-30 Basic Protocol</a>
+     * @see <a href="http://xmpp.org/extensions/xep-0030.html#info-nodes">XEP-30 Info Nodes</a>
+     * 
      * @param entityID the address of the XMPP entity.
-     * @param node the attribute that supplements the 'jid' attribute.
+     * @param node the optional attribute that supplements the 'jid' attribute.
      * @return the discovered information.
      * @throws XMPPException if the operation failed for some reason.
      */
@@ -702,13 +660,18 @@ public class ServiceDiscoveryManager {
      * Entity Capabilities
      */
 
+    /**
+     * Loads the ServiceDiscoveryManager with an EntityCapsManger
+     * that speeds up certain lookups
+     * @param manager
+     */
     public void setEntityCapsManager(EntityCapsManager manager) {
         capsManager = manager;
-        if (connection.getServiceCapsNode() != null
-                        && connection.getServiceName() != null) {
-                capsManager.addUserCapsNode(connection.getServiceName(), connection.getServiceCapsNode());
-        }
-        capsManager.addPacketListener(connection);
+//        if (connection.getServiceCapsNode() != null
+//                        && connection.getServiceName() != null) {
+//                capsManager.addUserCapsNode(connection.getServiceName(), connection.getServiceCapsNode());
+//        }
+//        capsManager.addPacketListener(connection);
     }
 
     /**
@@ -716,27 +679,23 @@ public class ServiceDiscoveryManager {
      * if EntityCaps is enabled
      */
     private void renewEntityCapsVersion() {
-        // If a XMPPConnection is the managed one, see that the new
-        // version is updated
-        if (connection instanceof XMPPConnection) {
-            if (capsManager != null) {
-                capsManager.calculateEntityCapsVersion(capsManager.getOwnDiscoverInfo(),
-                        identityType, identityName, extendedInfo);
-                //capsManager.notifyCapsVerListeners();
-            }
+        if (capsManager != null) {
+            capsManager.calculateEntityCapsVersion(capsManager.getOwnDiscoverInfo(), identityType, identityName,
+                    extendedInfo);
+            // capsManager.notifyCapsVerListeners();
         }
     }
 
-    public String getEntityCapsVersion() {
+    /**
+     * 
+     * @return
+     */
+    private String getEntityCapsVersion() {
         if (capsManager != null) {
             return capsManager.getCapsVersion();
         }
         else {
             return null;
         }
-    }
-
-    public EntityCapsManager getEntityCapsManager(){
-        return capsManager;
     }
 }

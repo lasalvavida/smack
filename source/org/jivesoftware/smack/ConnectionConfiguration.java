@@ -723,31 +723,28 @@ public class ConnectionConfiguration implements Cloneable {
         this.password = password;
         this.resource = resource;
     }
-
-    boolean isEntityCapsEnabled() {
-        return enableEntityCaps;
-    }
-
+    
     /**
-     * Enable or disable Entity Capabilities (XEP-115)
-     * http://xmpp.org/extensions/xep-0115.html
-     *
-     * Only available with XMPPConnections
-     *
-     * Default is disabled
-     *
-     * @param enabled
+     * Set the servers Entity Caps node
+     * 
+     * ConnectionConfiguration holds this information in order to avoid a dependency to smackx
+     * where EntityCapsManager lives from smack.
+     * 
+     * @param node
      */
-    void setEntityCaps(boolean enabled) {
-        enableEntityCaps = enabled;
-    }
-
-    void setServiceCapsNode(String node){
+    void setServiceCapsNode(String node) {
         serviceCapsNode = node;
     }
-
-    String getServiceCapsNode(){
+    
+    /**
+     * Retrieve the servers Entity Caps node
+     * 
+     * ConnectionConfiguration holds this information in order to avoid a dependency to smackx
+     * where EntityCapsManager lives from smack.
+     * 
+     * @return
+     */
+    String getServiceCapsNode() {
         return serviceCapsNode;
     }
-
 }

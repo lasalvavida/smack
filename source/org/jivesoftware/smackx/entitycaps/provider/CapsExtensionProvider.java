@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.jivesoftware.smackx.provider;
+package org.jivesoftware.smackx.entitycaps.provider;
 
 import java.io.IOException;
 

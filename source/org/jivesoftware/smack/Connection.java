@@ -232,6 +232,14 @@ public abstract class Connection {
         return config.getHost();
     }
 
+    /**
+     * Retrieve the servers caps node
+     * 
+     * EntityCapsManager gets the caps node by Connection which retrieves it from the ConnectionConfiguration
+     * This detour is necessary to avoid dependencies from smack to smackx
+     * 
+     * @return
+     */
     public String getServiceCapsNode() {
         return config.getServiceCapsNode();
     }
@@ -699,10 +707,6 @@ public abstract class Connection {
      */
     protected Map<PacketInterceptor, InterceptorWrapper> getPacketInterceptors() {
         return interceptors;
-    }
-
-    public boolean isSendPresence() {
-        return config.isSendPresence();
     }
 
     /**
