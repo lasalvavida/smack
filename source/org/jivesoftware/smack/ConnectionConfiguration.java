@@ -61,8 +61,6 @@ public class ConnectionConfiguration implements Cloneable {
     private boolean notMatchingDomainCheckEnabled = false;
 
     private boolean compressionEnabled = false;
-    private boolean enableEntityCaps = false;
-    private String serviceCapsNode = null;
 
     private boolean saslAuthenticationEnabled = true;
     /**
@@ -722,29 +720,5 @@ public class ConnectionConfiguration implements Cloneable {
         this.username = username;
         this.password = password;
         this.resource = resource;
-    }
-    
-    /**
-     * Set the servers Entity Caps node
-     * 
-     * ConnectionConfiguration holds this information in order to avoid a dependency to smackx
-     * where EntityCapsManager lives from smack.
-     * 
-     * @param node
-     */
-    void setServiceCapsNode(String node) {
-        serviceCapsNode = node;
-    }
-    
-    /**
-     * Retrieve the servers Entity Caps node
-     * 
-     * ConnectionConfiguration holds this information in order to avoid a dependency to smackx
-     * where EntityCapsManager lives from smack.
-     * 
-     * @return
-     */
-    String getServiceCapsNode() {
-        return serviceCapsNode;
     }
 }

@@ -48,7 +48,7 @@ public class ServiceDiscoveryManagerTest extends SmackTestCase {
                 .getInstanceFor(getConnection(0));
         try {
             // Discover the information of another Smack client
-            DiscoverInfo info = discoManager.discoverInfo(getFullJID(1));
+             DiscoverInfo info = discoManager.discoverInfo(getFullJID(1));
             // Check the identity of the Smack client
             Iterator<Identity> identities = info.getIdentities();
             assertTrue("No identities were found", identities.hasNext());
@@ -149,5 +149,10 @@ public class ServiceDiscoveryManagerTest extends SmackTestCase {
 
     protected int getMaxConnections() {
         return 2;
+    }
+    
+    protected void setUp() throws Exception {
+        super.setUp();
+//        letsAllBeFriends();
     }
 }

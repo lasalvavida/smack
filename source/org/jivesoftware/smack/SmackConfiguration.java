@@ -111,8 +111,11 @@ public final class SmackConfiguration {
                                 else if (parser.getName().equals("packetCollectorSize")) {
                                     packetCollectorSize = parseIntProperty(parser, packetCollectorSize);
                                 }
- else if (parser.getName().equals("defaultPingInterval")) {
+                                else if (parser.getName().equals("defaultPingInterval")) {
                                     defaultPingInterval = parseIntProperty(parser, defaultPingInterval);
+                                }
+                                else if (parser.getName().equals("autoEnableEntityCaps")) {
+                                    autoEnableEntityCaps = Boolean.parseBoolean(parser.nextText());
                                 }
                             }
                             eventType = parser.next();
@@ -320,6 +323,10 @@ public final class SmackConfiguration {
     
     public static boolean autoEnableEntityCaps() {
         return autoEnableEntityCaps;
+    }
+    
+    public static void setAutoEnableEntityCaps(boolean b) {
+        autoEnableEntityCaps = b;
     }
 
     private static void parseClassToLoad(XmlPullParser parser) throws Exception {

@@ -26,12 +26,13 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
+import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
-import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smackx.entitycaps.Base64Encoder;
 import org.jivesoftware.smackx.entitycaps.EntityCapsManager;
 import org.jivesoftware.smackx.entitycaps.StringEncoder;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
+import org.jivesoftware.smackx.provider.DiscoverInfoProvider;
 import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -54,12 +55,23 @@ public class SimpleDirectoryPersistentCache implements
      * Creates a new SimpleDirectoryPersistentCache Object. Make sure that the
      * cacheDir exists and that it's an directory.
      * 
+     * If your cacheDir is case insensitive then make sure to set the StringEncoder to Base32.
+     * 
      * @param cacheDir
      */
     public SimpleDirectoryPersistentCache(File cacheDir) {
         this(cacheDir, new Base64Encoder());
     }
     
+    /**
+     * Creates a new SimpleDirectoryPersistentCache Object. Make sure that the
+     * cacheDir exists and that it's an directory.
+     * 
+     * If your cacheDir is case insensitive then make sure to set the StringEncoder to Base32.
+     * 
+     * @param cacheDir
+     * @param stringEncoder
+     */
     public SimpleDirectoryPersistentCache(File cacheDir, StringEncoder stringEncoder) {
         if (!cacheDir.exists())
             throw new IllegalStateException("Cache directory \"" + cacheDir
@@ -133,6 +145,10 @@ public class SimpleDirectoryPersistentCache implements
             throws IOException {
         DataInputStream dis = new DataInputStream(new FileInputStream(file));
         String fileContent = null;
+        String id;
+        String from;
+        String to;
+        
         try {
             fileContent = dis.readUTF();
         } finally {
@@ -153,33 +169,29 @@ public class SimpleDirectoryPersistentCache implements
         }
 
         DiscoverInfo iqPacket;
-        IQProvider provider = (IQProvider) ProviderManager
-                .getInstance()
-                .getIQProvider("query", "http://jabber.org/protocol/disco#info");
-
-        // Skip the first <iq id=....> tag
+        IQProvider provider = new DiscoverInfoProvider();
+        
+        // Parse the IQ, we only need the id
         try {
             parser.next();
-        } catch (XmlPullParserException e1) {
-            e1.printStackTrace();
-            return null;
-        }
-
-        // Point parser to the query tag
-        try {
+            id = parser.getAttributeValue("", "id");
+            from = parser.getAttributeValue("", "from");
+            to = parser.getAttributeValue("", "to");
             parser.next();
         } catch (XmlPullParserException e1) {
-            e1.printStackTrace();
             return null;
         }
 
         try {
             iqPacket = (DiscoverInfo) provider.parseIQ(parser);
         } catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
-
+        
+        iqPacket.setPacketID(id);
+        iqPacket.setFrom(from);
+        iqPacket.setTo(to);
+        iqPacket.setType(IQ.Type.RESULT);
         return iqPacket;
     }
 }

@@ -20,6 +20,7 @@
 
 package org.jivesoftware.smackx;
 
+import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.jivesoftware.smackx.packet.DiscoverItems;
 
@@ -64,5 +65,7 @@ public interface NodeInformationProvider {
      * @return a list of the Identities defined in the node.
      */
     public abstract List<DiscoverInfo.Identity> getNodeIdentities();
+    
+    public abstract List<PacketExtension> getNodePacketExtensions();
 
 }

@@ -192,6 +192,8 @@ public abstract class Connection {
      * Holds the initial configuration used while creating the connection.
      */
     protected final ConnectionConfiguration config;
+    
+    private String serviceCapsNode;
 
     /**
      * Create a new Connection to a XMPP server.
@@ -230,18 +232,6 @@ public abstract class Connection {
      */
     public String getHost() {
         return config.getHost();
-    }
-
-    /**
-     * Retrieve the servers caps node
-     * 
-     * EntityCapsManager gets the caps node by Connection which retrieves it from the ConnectionConfiguration
-     * This detour is necessary to avoid dependencies from smack to smackx
-     * 
-     * @return
-     */
-    public String getServiceCapsNode() {
-        return config.getServiceCapsNode();
     }
 
     /**
@@ -794,7 +784,29 @@ public abstract class Connection {
         }
     }
 
-
+    /**
+     * Set the servers Entity Caps node
+     * 
+     * Connection holds this information in order to avoid a dependency to smackx
+     * where EntityCapsManager lives from smack.
+     * 
+     * @param node
+     */
+    protected void setServiceCapsNode(String node) {
+        serviceCapsNode = node;
+    }
+    
+    /**
+     * Retrieve the servers Entity Caps node
+     * 
+     * Connection holds this information in order to avoid a dependency to smackx
+     * where EntityCapsManager lives from smack.
+     * 
+     * @return
+     */
+    public String getServiceCapsNode() {
+        return serviceCapsNode;
+    }
 
     /**
      * A wrapper class to associate a packet filter with a listener.

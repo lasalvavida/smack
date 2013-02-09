@@ -401,10 +401,9 @@ class PacketReader {
                     if (ver != null && node != null) {
                         String capsNode = node + "#" + ver;
                         // In order to avoid a dependency from smack to smackx
-                        // we have to set the services caps node in the
-                        // connection configuration
+                        // we have to set the services caps node in the connection
                         // and not directly in the EntityCapsManager
-                        connection.getConfiguration().setServiceCapsNode(capsNode);
+                        connection.setServiceCapsNode(capsNode);
                     }
                 }
                 else if (parser.getName().equals("session")) {

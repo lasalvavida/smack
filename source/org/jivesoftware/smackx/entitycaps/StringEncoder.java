@@ -17,6 +17,8 @@
  */
 package org.jivesoftware.smackx.entitycaps;
 
+// TODO move StringEncoder, Base64Encoder and Base32Encoder to smack.util
+
 public interface StringEncoder {
     /**
      * Encodes an string to another representation

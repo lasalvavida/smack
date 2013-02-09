@@ -42,6 +42,8 @@ import org.jivesoftware.smackx.packet.DataForm;
  * Depending of the form's type different operations are available. For example, it's only possible
  * to set answers if the form is of type "submit".
  * 
+ * @see <a href="http://xmpp.org/extensions/xep-0004.html">XEP-0004 Data Forms</a>
+ * 
  * @author Gaston Dombiak
  */
 public class Form {
@@ -50,6 +52,9 @@ public class Form {
     public static final String TYPE_SUBMIT = "submit";
     public static final String TYPE_CANCEL = "cancel";
     public static final String TYPE_RESULT = "result";
+    
+    public static final String NAMESPACE = "jabber:x:data";
+    public static final String ELEMENT = "x";
     
     private DataForm dataForm;
     

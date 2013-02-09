@@ -90,6 +90,22 @@ public abstract class Packet {
     private final Map<String,Object> properties = new HashMap<String, Object>();
     private XMPPError error = null;
 
+    public Packet() {
+    }
+    
+    public Packet(Packet p) {
+        packetID = p.getPacketID();
+        to = p.getTo();
+        from = p.getFrom();
+        xmlns = p.xmlns;
+        error = p.error;
+
+        // Copy extensions
+        for (PacketExtension pe : p.getExtensions()) {
+            addExtension(pe);
+        }    
+    }
+    
     /**
      * Returns the unique ID of the packet. The returned value could be <tt>null</tt> when
      * ID_NOT_AVAILABLE was set as the packet's id.
