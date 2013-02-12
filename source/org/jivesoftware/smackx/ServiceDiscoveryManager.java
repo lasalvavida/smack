@@ -384,6 +384,17 @@ public class ServiceDiscoveryManager {
     }
 
     /**
+     * Returns the supported features by this XMPP entity.
+     * 
+     * @return a copy of the List on the supported features by this XMPP entity.
+     */
+    public List<String> getFeaturesList() {
+        synchronized (features) {
+            return new LinkedList<String>(features);
+        }
+    }
+
+    /**
      * Registers that a new feature is supported by this XMPP entity. When this client is 
      * queried for its information the registered features will be answered.<p>
      *

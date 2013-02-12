@@ -55,9 +55,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.security.MessageDigest;
@@ -116,6 +118,7 @@ public class EntityCapsManager {
     private boolean entityCapsEnabled;
     private String currentCapsVersion;
     private boolean presenceSend = false;
+    private Queue<String> lastLocalCapsVersions = new ConcurrentLinkedQueue<String>();
 
     /**
      * Add DiscoverInfo to the database.
@@ -429,41 +432,41 @@ public class EntityCapsManager {
         if (connection != null)
             discoverInfo.setFrom(connection.getUser());
         sdm.addDiscoverInfoTo(discoverInfo);
-        
-        String capsVersionHashed = generateVerificationString(discoverInfo, "sha-1");
-        addDiscoverInfoByNode(ENTITY_NODE + '#' + capsVersionHashed, discoverInfo);
-        String oldCapsVersion = currentCapsVersion;
-        currentCapsVersion = capsVersionHashed;
-        
+
+        currentCapsVersion = generateVerificationString(discoverInfo, "sha-1");
+        addDiscoverInfoByNode(ENTITY_NODE + '#' + currentCapsVersion, discoverInfo);
+        if (lastLocalCapsVersions.size() > 10) {
+            String oldCapsVersion = lastLocalCapsVersions.poll();
+            sdm.removeNodeInformationProvider(ENTITY_NODE + '#' + oldCapsVersion);
+        }
+        lastLocalCapsVersions.add(currentCapsVersion);
+
         caps.put(currentCapsVersion, discoverInfo);
         if (connection != null)
             jidCaps.put(connection.getUser(), new NodeVerHash(ENTITY_NODE, currentCapsVersion, "sha-1"));
-        
-        if (oldCapsVersion != null)
-            sdm.removeNodeInformationProvider(ENTITY_NODE + '#' + oldCapsVersion);
-        
+
+
         sdm.setNodeInformationProvider(ENTITY_NODE + '#' + currentCapsVersion, new NodeInformationProvider() {
+            List<String> features = sdm.getFeaturesList();
+            List<Identity> identities = new LinkedList<Identity>(ServiceDiscoveryManager.getIdentities());
+            DataForm extendedInfo = sdm.getExtendedInfo();
+
             @Override
             public List<Item> getNodeItems() {
                 return null;
             }
             @Override
             public List<String> getNodeFeatures() {
-                Iterator<String> iter = sdm.getFeatures();
-                List<String> copy = new LinkedList<String>();
-                while (iter.hasNext())
-                    copy.add(iter.next());
-                
-                return copy;
+                return features;
             }
             @Override
             public List<Identity> getNodeIdentities() {
-                return ServiceDiscoveryManager.getIdentities();
+                return identities;
             }
             @Override
             public List<PacketExtension> getNodePacketExtensions() {
                 List<PacketExtension> res = new LinkedList<PacketExtension>();
-                res.add(sdm.getExtendedInfo());
+                res.add(extendedInfo);
                 return res;
             }
         });
