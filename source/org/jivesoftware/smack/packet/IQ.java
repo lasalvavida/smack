@@ -46,7 +46,7 @@ public abstract class IQ extends Packet {
     public IQ() {
         super();
     }
-    
+
     public IQ(IQ iq) {
         super(iq);
         type = iq.getType();

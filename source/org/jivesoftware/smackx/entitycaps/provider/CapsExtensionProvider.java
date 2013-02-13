@@ -22,38 +22,33 @@ import java.io.IOException;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.provider.PacketExtensionProvider;
+import org.jivesoftware.smackx.entitycaps.EntityCapsManager;
 import org.jivesoftware.smackx.entitycaps.packet.CapsExtension;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 public class CapsExtensionProvider implements PacketExtensionProvider {
-    private static final int MAX_DEPTH = 10;
 
     public PacketExtension parseExtension(XmlPullParser parser) throws XmlPullParserException, IOException,
             XMPPException {
         String hash = null;
         String version = null;
         String node = null;
-        int depth = 0;
-        while (true) {
-            if (parser.getEventType() == XmlPullParser.START_TAG && parser.getName().equalsIgnoreCase("c")) {
-                hash = parser.getAttributeValue(null, "hash");
-                version = parser.getAttributeValue(null, "ver");
-                node = parser.getAttributeValue(null, "node");
-            }
+        if (parser.getEventType() == XmlPullParser.START_TAG
+                && parser.getName().equalsIgnoreCase(EntityCapsManager.ELEMENT)) {
+            hash = parser.getAttributeValue(null, "hash");
+            version = parser.getAttributeValue(null, "ver");
+            node = parser.getAttributeValue(null, "node");
+        } else {
+            throw new XMPPException("Malformed Caps element");
+        }
 
-            if (parser.getEventType() == XmlPullParser.END_TAG && parser.getName().equalsIgnoreCase("c")) {
-                break;
-            } else {
-                parser.next();
-            }
+        parser.next();
 
-            if (depth < MAX_DEPTH) {
-                depth++;
-            } else {
-                throw new XMPPException("Malformed caps element");
-            }
+        if (!(parser.getEventType() == XmlPullParser.END_TAG
+                && parser.getName().equalsIgnoreCase(EntityCapsManager.ELEMENT))) {
+            throw new XMPPException("Malformed nested Caps element");
         }
 
         if (hash != null && version != null && node != null) {

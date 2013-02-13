@@ -59,7 +59,7 @@ public final class SmackConfiguration {
     private static int packetCollectorSize = 5000;
 
     private static int defaultPingInterval = 1800000; // 30 min (30*60*1000)
-    
+
     private static boolean autoEnableEntityCaps = false;
 
     private SmackConfiguration() {
@@ -320,11 +320,20 @@ public final class SmackConfiguration {
     public static void setDefaultPingInterval(int defaultPingInterval) {
         SmackConfiguration.defaultPingInterval = defaultPingInterval;
     }
-    
+
+    /**
+     * Check if Entity Caps are enabled as default for every new connection
+     * @return
+     */
     public static boolean autoEnableEntityCaps() {
         return autoEnableEntityCaps;
     }
-    
+
+    /**
+     * Set if Entity Caps are enabled or disabled for every new connection
+     * 
+     * @param true if Entity Caps should be auto enabled, false if not
+     */
     public static void setAutoEnableEntityCaps(boolean b) {
         autoEnableEntityCaps = b;
     }

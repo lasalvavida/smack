@@ -37,7 +37,7 @@ import java.util.List;
  * @author Gaston Dombiak
  */
 public interface NodeInformationProvider {
-    
+
     /**
      * Returns a list of the Items {@link org.jivesoftware.smackx.packet.DiscoverItems.Item}
      * defined in the node. For example, the MUC protocol specifies that an XMPP client should 
@@ -65,7 +65,11 @@ public interface NodeInformationProvider {
      * @return a list of the Identities defined in the node.
      */
     public abstract List<DiscoverInfo.Identity> getNodeIdentities();
-    
-    public abstract List<PacketExtension> getNodePacketExtensions();
 
+    /**
+     * Returns a list of the packet extensions defined in the node.
+     *
+     * @return a list of the packet extensions defined in the node.
+     */
+    public abstract List<PacketExtension> getNodePacketExtensions();
 }

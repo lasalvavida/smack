@@ -482,7 +482,12 @@ public abstract class SmackTestCase extends TestCase {
         int firstChar = fullClassName.lastIndexOf('.') + 1;
         return "config/" + fullClassName.substring(firstChar) + ".xml";
     }
-    
+
+    /**
+     * Subscribes all connections with each other: They all become friends
+     * 
+     * @throws XMPPException
+     */
     protected void letsAllBeFriends() throws XMPPException {
         ConnectionUtils.letsAllBeFriends(connections);
     }

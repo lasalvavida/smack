@@ -195,10 +195,10 @@ public class DataForm implements PacketExtension {
             items.add(item);
         }
     }
-    
+
     /**
-     * Returns true if this DataForm has at least one FORM_TYPE field which is hidden
-     * This method is used for sanity checks
+     * Returns true if this DataForm has at least one FORM_TYPE field which is
+     * hidden. This method is used for sanity checks.
      *
      * @return
      */

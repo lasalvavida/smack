@@ -47,17 +47,17 @@ import org.jivesoftware.smackx.packet.DataForm;
  * @author Gaston Dombiak
  */
 public class Form {
-    
+
     public static final String TYPE_FORM = "form";
     public static final String TYPE_SUBMIT = "submit";
     public static final String TYPE_CANCEL = "cancel";
     public static final String TYPE_RESULT = "result";
-    
+
     public static final String NAMESPACE = "jabber:x:data";
     public static final String ELEMENT = "x";
-    
+
     private DataForm dataForm;
-    
+
     /**
      * Returns a new ReportedData if the packet is used for gathering data and includes an 
      * extension that matches the elementName and namespace "x","jabber:x:data".  

@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jivesoftware.smackx.entitycaps;
+package org.jivesoftware.smack.util;
 
 
 import java.io.ByteArrayOutputStream;

@@ -21,7 +21,6 @@
 package org.jivesoftware.smackx;
 
 import org.jivesoftware.smack.util.StringUtils;
-import org.jivesoftware.smackx.packet.DiscoverInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -299,8 +298,7 @@ public class FormField {
         buf.append("</field>");
         return buf.toString();
     }
-    
-    
+
     public boolean equals(Object obj) {
         if (obj == null)
             return false;
@@ -308,12 +306,12 @@ public class FormField {
             return true;
         if (obj.getClass() != getClass())
             return false;
-        
+
         FormField other = (FormField) obj;
-        
+
         String thisXml = toXML();
         String otherXml = other.toXML();
-        
+
         if (thisXml.equals(otherXml)) {
             return true;
         } else {
@@ -376,7 +374,7 @@ public class FormField {
             buf.append("</option>");
             return buf.toString();
         }
-        
+
         public boolean equals(Object obj) {
             if (obj == null)
                 return false;
@@ -384,18 +382,18 @@ public class FormField {
                 return true;
             if (obj.getClass() != getClass())
                 return false;
-            
+
             Option other = (Option) obj;
-            
+
             if (!value.equals(other.value))
                 return false;
-            
+
             String thisLabel = label == null ? "" : label;
             String otherLabel = other.label == null ? "" : other.label;
-            
+
             if (!thisLabel.equals(otherLabel))
                 return false;
-            
+
             return true;
         }
     }

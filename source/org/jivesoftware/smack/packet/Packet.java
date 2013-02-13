@@ -92,7 +92,7 @@ public abstract class Packet {
 
     public Packet() {
     }
-    
+
     public Packet(Packet p) {
         packetID = p.getPacketID();
         to = p.getTo();
@@ -103,9 +103,9 @@ public abstract class Packet {
         // Copy extensions
         for (PacketExtension pe : p.getExtensions()) {
             addExtension(pe);
-        }    
+        }
     }
-    
+
     /**
      * Returns the unique ID of the packet. The returned value could be <tt>null</tt> when
      * ID_NOT_AVAILABLE was set as the packet's id.

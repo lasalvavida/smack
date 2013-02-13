@@ -1,7 +1,7 @@
 /**
  * $RCSfile$
- * $Revision: 7071 $
- * $Date: 2007-02-12 08:59:05 +0800 (Mon, 12 Feb 2007) $
+ * $Revision$
+ * $Date$
  *
  * Copyright 2003-2007 Jive Software.
  *
@@ -39,7 +39,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @author Gaston Dombiak
  */
-public class DiscoverInfo extends IQ implements Cloneable {
+public class DiscoverInfo extends IQ {
 
     public static final String NAMESPACE = "http://jabber.org/protocol/disco#info";
 
@@ -50,6 +50,7 @@ public class DiscoverInfo extends IQ implements Cloneable {
     public DiscoverInfo() {
         super();
     }
+
     /**
      * Copy constructor
      * 
@@ -112,9 +113,9 @@ public class DiscoverInfo extends IQ implements Cloneable {
             identities.add(identity);
         }
     }
-    
+
     /**
-     * Adds identities to the discovered information
+     * Adds identities to the DiscoverInfo stanza
      * 
      * @param identities
      */
@@ -199,8 +200,13 @@ public class DiscoverInfo extends IQ implements Cloneable {
         buf.append("</query>");
         return buf.toString();
     }
-    
-    public boolean containsDuplicateIdentities() {  // TODO write unit tests for this two functions        
+
+    /**
+     * Test if a DiscoverInfo response contains duplicate identities.
+     * 
+     * @return true if duplicate identities where found, otherwise false
+     */
+    public boolean containsDuplicateIdentities() {
         List<Identity> checkedIdentities = new LinkedList<Identity>();
         for (Identity i : identities) {
             for (Identity i2 : checkedIdentities) {
@@ -211,7 +217,12 @@ public class DiscoverInfo extends IQ implements Cloneable {
         }
         return false;
     }
-    
+
+    /**
+     * Test if a DiscoverInfo response contains duplicate features.
+     * 
+     * @return true if duplicate identities where found, otherwise false
+     */
     public boolean containsDuplicateFeatures() {
         List<Feature> checkedFeatures = new LinkedList<Feature>();
         for (Feature f : features) {
@@ -234,8 +245,6 @@ public class DiscoverInfo extends IQ implements Cloneable {
      * 
      */
     public static class Identity implements Comparable<Object> {
-        
-        public static final String defaultType = "pc";
 
         private String category;
         private String name;
@@ -246,8 +255,6 @@ public class DiscoverInfo extends IQ implements Cloneable {
          * Creates a new identity for an XMPP entity.
          * 'category' and 'type' are required by 
          * <a href="http://xmpp.org/extensions/xep-0030.html#schemas">XEP-30 XML Schemas</a>
-         * 
-         * 
          * 
          * @param category the entity's category (required as per XEP-30).
          * @param name the entity's name.
@@ -329,7 +336,7 @@ public class DiscoverInfo extends IQ implements Cloneable {
             buf.append("/>");
             return buf.toString();
         }
-        
+
         /** 
          * Check equality for Identity  for category, type, lang and name
          * in that order as defined by
@@ -343,37 +350,46 @@ public class DiscoverInfo extends IQ implements Cloneable {
                 return true;
             if (obj.getClass() != getClass())
                 return false;
-            
+
             DiscoverInfo.Identity other = (DiscoverInfo.Identity) obj;
             if (!this.category.equals(other.category))
                 return false;
-            
+
             String otherLang = other.lang == null ? "" : other.lang;
             String thisLang = lang == null ? "" : lang;
-            
+
             if (!other.type.equals(type))
                 return false;
             if (!otherLang.equals(thisLang))
                 return false;
-            
+
             String otherName = other.name == null ? "" : other.name;
             String thisName = name == null ? "" : other.name;
             if (!thisName.equals(otherName))
                 return false;
-            
+
             return true;
         }
-        
+
+        /**
+         * Compares and identity with another object. The comparison order is:
+         * Category, Type, Lang. If all three are identical the other Identity is considered equal.
+         * Name is not used for comparision, as defined by XEP-0115
+         * 
+         * @param obj
+         * @return
+         */
         public int compareTo(Object obj) {
-            
+
             DiscoverInfo.Identity other = (DiscoverInfo.Identity) obj;
             String otherLang = other.lang == null ? "" : other.lang;
             String thisLang = lang == null ? "" : lang;
-            
+
             if (category.equals(other.category)) {
                 if (type.equals(other.type)) {
                     if (thisLang.equals(otherLang)) {
-                        // Don't compare on name, XEP-30 says that name SHOULD be equals for all identities of an entity
+                        // Don't compare on name, XEP-30 says that name SHOULD
+                        // be equals for all identities of an entity
                         return 0;
                     } else {
                         return thisLang.compareTo(otherLang);
@@ -383,7 +399,7 @@ public class DiscoverInfo extends IQ implements Cloneable {
                 }
             } else {
                 return category.compareTo(other.category);
-            }   
+            }
         }
     }
 
@@ -420,7 +436,7 @@ public class DiscoverInfo extends IQ implements Cloneable {
             buf.append("<feature var=\"").append(StringUtils.escapeForXML(variable)).append("\"/>");
             return buf.toString();
         }
-        
+
         public boolean equals(Object obj) {
             if (obj == null)
                 return false;
@@ -428,7 +444,7 @@ public class DiscoverInfo extends IQ implements Cloneable {
                 return true;
             if (obj.getClass() != getClass())
                 return false;
-            
+
             DiscoverInfo.Feature other = (DiscoverInfo.Feature) obj;
             return variable.equals(other.variable);
         }

@@ -12,27 +12,20 @@
  * limitations under the License.
  */
 
+package org.jivesoftware.smack.util;
+
+
 /**
  * @author Florian Schmaus
  */
-package org.jivesoftware.smackx.entitycaps;
+public class Base64Encoder implements StringEncoder {
 
-// TODO move StringEncoder, Base64Encoder and Base32Encoder to smack.util
+    public String encode(String s) {
+        return Base64.encodeBytes(s.getBytes());
+    }
 
-public interface StringEncoder {
-    /**
-     * Encodes an string to another representation
-     * 
-     * @param string
-     * @return
-     */
-    public String encode(String string);
+    public String decode(String s) {
+        return new String(Base64.decode(s));
+    }
     
-    /**
-     * Decodes an string back to it's initial representation
-     * 
-     * @param string
-     * @return
-     */
-    public String decode(String string);
 }

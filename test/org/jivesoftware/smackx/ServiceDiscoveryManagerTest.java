@@ -150,9 +150,4 @@ public class ServiceDiscoveryManagerTest extends SmackTestCase {
     protected int getMaxConnections() {
         return 2;
     }
-    
-    protected void setUp() throws Exception {
-        super.setUp();
-//        letsAllBeFriends();
-    }
 }

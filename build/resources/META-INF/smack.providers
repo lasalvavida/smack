@@ -678,7 +678,7 @@
         <namespace>urn:xmpp:receipts</namespace>
         <className>org.jivesoftware.smackx.receipts.DeliveryReceiptRequest$Provider</className>
     </extensionProvider>
-    
+
     <!-- XEP-0115 Entity Capabilities -->
     <extensionProvider>
         <elementName>c</elementName>

@@ -140,7 +140,7 @@ public class EntityCapsTest extends SmackTestCase {
         EntityCapsManager.caps.clear();
         EntityCapsManager.jidCaps.clear();
     }
-    
+
     private static void dropCapsCache() {
         EntityCapsManager.caps.clear();
     }

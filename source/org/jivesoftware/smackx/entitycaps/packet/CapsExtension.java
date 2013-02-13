@@ -73,10 +73,10 @@ public class CapsExtension implements PacketExtension {
      *
      */
     public String toXML() {
-        String xml = "<c xmlns='" + EntityCapsManager.NAMESPACE + "' " +
-            "hash='" + hash + "' " +
-            "node='" + node + "' " +
-            "ver='" + ver + "'/>";
+        String xml = "<" + EntityCapsManager.ELEMENT + " xmlns=\"" + EntityCapsManager.NAMESPACE + "\" " +
+            "hash=\"" + hash + "\" " +
+            "node=\"" + node + "\" " +
+            "ver=\"" + ver + "\"/>";
 
         return xml;
     }

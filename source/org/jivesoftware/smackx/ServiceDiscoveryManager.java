@@ -52,7 +52,7 @@ public class ServiceDiscoveryManager {
     private static final String DEFAULT_IDENTITY_NAME = "Smack";
     private static final String DEFAULT_IDENTITY_CATEGORY = "client";
     private static final String DEFAULT_IDENTITY_TYPE = "pc";
-        
+
     private static List<DiscoverInfo.Identity> identities = new LinkedList<DiscoverInfo.Identity>();
 
     private EntityCapsManager capsManager;
@@ -112,7 +112,7 @@ public class ServiceDiscoveryManager {
             return identity.getName();
         } else {
             return null;
-        } 
+        }
     }
 
     /**
@@ -159,10 +159,10 @@ public class ServiceDiscoveryManager {
             identity.setType(type);
         } else {
             identity = new DiscoverInfo.Identity(DEFAULT_IDENTITY_CATEGORY, DEFAULT_IDENTITY_NAME, type);
-            identities.add(identity);                     
+            identities.add(identity);
         }
     }
-    
+
     /**
      * Returns all identities of this client as unmodifiable Collection
      * 
@@ -299,7 +299,6 @@ public class ServiceDiscoveryManager {
         };
         connection.addPacketListener(packetListener, packetFilter);
     }
-    
 
     /**
      * Add discover info response data.
@@ -311,7 +310,7 @@ public class ServiceDiscoveryManager {
     public void addDiscoverInfoTo(DiscoverInfo response) {
         // First add the identities of the connection
         response.addIdentities(identities);
-        
+
         // Add the registered features to the response
         synchronized (features) {
             for (Iterator<String> it = getFeatures(); it.hasNext();) {
@@ -458,13 +457,19 @@ public class ServiceDiscoveryManager {
       extendedInfo = info;
       renewEntityCapsVersion();
     }
-    
+
+    /**
+     * Returns the data form that is set as extended information for this Service Discovery instance (XEP-0128)
+     * 
+     * @see <a href="http://xmpp.org/extensions/xep-0128.html">XEP-128: Service Discovery Extensions</a>
+     * @return
+     */
     public DataForm getExtendedInfo() {
         return extendedInfo;
     }
 
     /**
-     * Removes the dataform containing extended service discovery information
+     * Removes the data form containing extended service discovery information
      * from the information returned by this XMPP entity.<p>
      *
      * Since no packet is actually sent to the server it is safe to perform this
@@ -486,16 +491,18 @@ public class ServiceDiscoveryManager {
     public DiscoverInfo discoverInfo(String entityID) throws XMPPException {
         if (entityID == null)
             return discoverInfo(null, null);
-        
+
         // Check if the have it cached in the Entity Capabilities Manager
         DiscoverInfo info = EntityCapsManager.getDiscoverInfoByUser(entityID);
 
         if (info != null) {
-            // We were able to retrieve the information from Entity Caps and avoided a disco request, hurray!
+            // We were able to retrieve the information from Entity Caps and
+            // avoided a disco request, hurray!
             return info;
-        } 
+        }
 
-        // Try to get the newest node#version if it's known, otherwise null is returned
+        // Try to get the newest node#version if it's known, otherwise null is
+        // returned
         EntityCapsManager.NodeVerHash nvh = EntityCapsManager.getNodeVerHashByJid(entityID);
 
         // Discover by requesting the information from the remote entity
