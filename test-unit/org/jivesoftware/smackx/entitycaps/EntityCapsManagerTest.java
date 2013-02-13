@@ -103,10 +103,10 @@ public class EntityCapsManagerTest {
 
         Collection<DiscoverInfo.Identity> identities = new LinkedList<DiscoverInfo.Identity>();
         DiscoverInfo.Identity i = new DiscoverInfo.Identity("client", "Psi 0.11", "pc");
-        i.setLang("en");
+        i.setLanguage("en");
         identities.add(i);
         i = new DiscoverInfo.Identity("client", "Ψ 0.11", "pc");
-        i.setLang("el");
+        i.setLanguage("el");
         identities.add(i);
         di.addIdentities(identities);
 
@@ -156,15 +156,15 @@ public class EntityCapsManagerTest {
 
         Collection<DiscoverInfo.Identity> identities = new LinkedList<DiscoverInfo.Identity>();
         DiscoverInfo.Identity i = new DiscoverInfo.Identity("client", "Psi 0.11", "pc");
-        i.setLang("en");
+        i.setLanguage("en");
         identities.add(i);
         i = new DiscoverInfo.Identity("client", "Ψ 0.11", "pc");
-        i.setLang("el");
+        i.setLanguage("el");
         identities.add(i);
         di.addIdentities(identities);
         // Failure 1: Duplicate identities
         i = new DiscoverInfo.Identity("client", "Ψ 0.11", "pc");
-        i.setLang("el");
+        i.setLanguage("el");
         identities.add(i);
         di.addIdentities(identities);
 

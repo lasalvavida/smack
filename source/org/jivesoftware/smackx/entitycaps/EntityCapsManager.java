@@ -597,7 +597,7 @@ public class EntityCapsManager {
             sb.append("/");
             sb.append(identity.getType());
             sb.append("/");
-            sb.append(identity.getLang() == null ? "" : identity.getLang());
+            sb.append(identity.getLanguage() == null ? "" : identity.getLanguage());
             sb.append("/");
             sb.append(identity.getName() == null ? "" : identity.getName());
             sb.append("<");

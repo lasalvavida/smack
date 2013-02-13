@@ -26,6 +26,7 @@ import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smackx.entitycaps.EntityCapsManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
@@ -226,13 +227,10 @@ public class ServiceDiscoveryManager {
                     NodeInformationProvider nodeInformationProvider =
                             getNodeInformationProvider(discoverItems.getNode());
                     if (nodeInformationProvider != null) {
-                        // Specified node was found
-                        List<DiscoverItems.Item> items = nodeInformationProvider.getNodeItems();
-                        if (items != null) {
-                            for (DiscoverItems.Item item : items) {
-                                response.addItem(item);
-                            }
-                        }
+                        // Specified node was found, add node items
+                        response.addItems(nodeInformationProvider.getNodeItems());
+                        // Add packet extensions
+                        response.addExtensions(nodeInformationProvider.getNodePacketExtensions());
                     } else if(discoverItems.getNode() != null) {
                         // Return <item-not-found/> error since client doesn't contain
                         // the specified node
@@ -272,20 +270,11 @@ public class ServiceDiscoveryManager {
                                 getNodeInformationProvider(discoverInfo.getNode());
                         if (nodeInformationProvider != null) {
                             // Node was found. Add node features
-                            List<String> features = nodeInformationProvider.getNodeFeatures();
-                            if (features != null) {
-                                for(String feature : features) {
-                                    response.addFeature(feature);
-                                }
-                            }
+                            response.addFeatures(nodeInformationProvider.getNodeFeatures());
                             // Add node identities
-                            List<DiscoverInfo.Identity> identities =
-                                    nodeInformationProvider.getNodeIdentities();
-                            if (identities != null) {
-                                for (DiscoverInfo.Identity identity : identities) {
-                                    response.addIdentity(identity);
-                                }
-                            }
+                            response.addIdentities(nodeInformationProvider.getNodeIdentities());
+                            // Add packet extensions
+                            response.addExtensions(nodeInformationProvider.getNodePacketExtensions());
                         }
                         else {
                             // Return <item-not-found/> error since specified node was not found

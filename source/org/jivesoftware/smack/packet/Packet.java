@@ -272,6 +272,16 @@ public abstract class Packet {
     }
 
     /**
+     * Adds a collection of packet extensions to the packet. Does nothing if extensions is null.
+     * 
+     * @param extensions a collection of packet extensions
+     */
+    public void addExtensions(Collection<PacketExtension> extensions) {
+        if (extensions == null) return;
+        packetExtensions.addAll(extensions);
+    }
+
+    /**
      * Removes a packet extension from the packet.
      *
      * @param extension the packet extension to remove.
@@ -282,7 +292,7 @@ public abstract class Packet {
 
     /**
      * Returns the packet property with the specified name or <tt>null</tt> if the
-     * property doesn't exist. Property values that were orginally primitives will
+     * property doesn't exist. Property values that were originally primitives will
      * be returned as their object equivalent. For example, an int property will be
      * returned as an Integer, a double as a Double, etc.
      *

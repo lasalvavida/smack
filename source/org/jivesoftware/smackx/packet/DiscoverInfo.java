@@ -86,6 +86,18 @@ public class DiscoverInfo extends IQ {
         addFeature(new Feature(feature));
     }
 
+    /**
+     * Adds a collection of features to the packet. Does noting if featuresToAdd is null.
+     *
+     * @param featuresToAdd
+     */
+    public void addFeatures(Collection<String> featuresToAdd) {
+        if (featuresToAdd == null) return;
+        for (String feature : featuresToAdd) {
+            addFeature(feature);
+        }
+    }
+
     private void addFeature(Feature feature) {
         synchronized (features) {
             features.add(feature);
@@ -117,11 +129,12 @@ public class DiscoverInfo extends IQ {
     /**
      * Adds identities to the DiscoverInfo stanza
      * 
-     * @param identities
+     * @param identitiesToAdd
      */
-    public void addIdentities(Collection<Identity> newIdentities) {
+    public void addIdentities(Collection<Identity> identitiesToAdd) {
+        if (identitiesToAdd == null) return;
         synchronized (identities) {
-            identities.addAll(newIdentities);
+            identities.addAll(identitiesToAdd);
         }
     }
 
@@ -306,20 +319,20 @@ public class DiscoverInfo extends IQ {
         }
 
         /**
-         * Sets the natural language for this identity (optional)
+         * Sets the natural language (xml:lang) for this identity (optional)
          * 
-         * @param lang
+         * @param lang the xml:lang of this Identity
          */
-        public void setLang(String lang) {
+        public void setLanguage(String lang) {
             this.lang = lang;
         }
 
         /**
          * Returns the identities natural language if one is set
          * 
-         * @return
+         * @return the value of xml:lang of this Identity
          */
-        public String getLang() {
+        public String getLanguage() {
             return lang;
         }
 

@@ -68,7 +68,7 @@ public class DiscoverInfoProvider implements IQProvider {
                     // Create a new identity and add it to the discovered info.
                     identity = new DiscoverInfo.Identity(category, name, type);
                     if (lang != null)
-                        identity.setLang(lang);
+                        identity.setLanguage(lang);
                     discoverInfo.addIdentity(identity);
                 }
                 if (parser.getName().equals("feature")) {
