@@ -4,18 +4,12 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.Collection;
 import java.util.LinkedList;
 
 import org.jivesoftware.smack.packet.IQ;
-import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smack.provider.IQProvider;
-import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.Base32Encoder;
 import org.jivesoftware.smack.util.Base64Encoder;
-import org.jivesoftware.smack.util.PacketParserUtils;
 import org.jivesoftware.smack.util.StringEncoder;
 import org.jivesoftware.smackx.FormField;
 import org.jivesoftware.smackx.entitycaps.EntityCapsManager;
@@ -24,9 +18,7 @@ import org.jivesoftware.smackx.entitycaps.cache.SimpleDirectoryPersistentCache;
 import org.jivesoftware.smackx.packet.DataForm;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.junit.Test;
-import org.xmlpull.mxp1.MXParser;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
+
 
 public class EntityCapsManagerTest {
 
@@ -45,13 +37,13 @@ public class EntityCapsManagerTest {
     @Test
     public void testSimpleDirectoryCacheBase64() throws IOException {
         EntityCapsManager.persistentCache = null;
-        testSimpleDirectoryCache(new Base64Encoder());
+        testSimpleDirectoryCache(Base64Encoder.getInstance());
     }
 
     @Test
     public void testSimpleDirectoryCacheBase32() throws IOException {
         EntityCapsManager.persistentCache = null;
-        testSimpleDirectoryCache(new Base32Encoder());
+        testSimpleDirectoryCache(Base32Encoder.getInstance());
     }
 
     @Test

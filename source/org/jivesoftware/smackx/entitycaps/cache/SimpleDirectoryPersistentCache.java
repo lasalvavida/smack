@@ -59,7 +59,7 @@ public class SimpleDirectoryPersistentCache implements EntityCapsPersistentCache
      * @param cacheDir
      */
     public SimpleDirectoryPersistentCache(File cacheDir) {
-        this(cacheDir, new Base64Encoder());
+        this(cacheDir, Base64Encoder.getInstance());
     }
 
     /**
