@@ -305,9 +305,7 @@ public class ServiceDiscoveryManager {
             for (Iterator<String> it = getFeatures(); it.hasNext();) {
                 response.addFeature(it.next());
             }
-            if (extendedInfo != null) {
-                response.addExtension(extendedInfo);
-            }
+            response.addExtension(extendedInfo);
         }
     }
 

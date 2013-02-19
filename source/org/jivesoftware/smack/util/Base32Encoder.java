@@ -19,21 +19,35 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 /**
+ * Base32 string encoding is useful for when filenames case-insensitive filesystems are encoded.
+ * Base32 representation takes roughly 20% more space then Base64.
  * 
  * @author Florian Schmaus
  * Based on code by Brian Wellington (bwelling@xbill.org)
+ * @see <a href="http://en.wikipedia.org/wiki/Base32">Base32 Wikipedia entry<a>
  *
  */
 public class Base32Encoder implements StringEncoder {
-    
+
+    private static Base32Encoder instance;
     private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ2345678";
+
+    private Base32Encoder() {
+        // Use getInstance()
+    }
+
+    public static Base32Encoder getInstance() {
+        if (instance == null) {
+            instance = new Base32Encoder();
+        }
+        return instance;
+    }
 
     @Override
     public String decode(String str) {
         ByteArrayOutputStream bs = new ByteArrayOutputStream();
-        byte [] raw = str.getBytes();
-        for (int i = 0; i < raw.length; i++)
-        {
+        byte[] raw = str.getBytes();
+        for (int i = 0; i < raw.length; i++) {
             char c = (char) raw[i];
             if (!Character.isWhitespace(c)) {
                 c = Character.toUpperCase(c);
@@ -44,7 +58,7 @@ public class Base32Encoder implements StringEncoder {
         while (bs.size() % 8 != 0)
             bs.write('8');
 
-        byte [] in = bs.toByteArray();
+        byte[] in = bs.toByteArray();
 
         bs.reset();
         DataOutputStream ds = new DataOutputStream(bs);
@@ -81,8 +95,7 @@ public class Base32Encoder implements StringEncoder {
             try {
                 for (int j = 0; j < blocklen; j++)
                     ds.writeByte((byte) (t[j] & 0xFF));
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
             }
         }
 
@@ -136,7 +149,7 @@ public class Base32Encoder implements StringEncoder {
         }
         return new String(os.toByteArray());
     }
-    
+
     private static int lenToPadding(int blocklen) {
         switch (blocklen) {
         case 1:
@@ -150,10 +163,10 @@ public class Base32Encoder implements StringEncoder {
         case 5:
             return 0;
         default:
-                return -1;
+            return -1;
         }
     }
-    
+
     private static int paddingToLen(int padlen) {
         switch (padlen) {
         case 6:
@@ -166,7 +179,7 @@ public class Base32Encoder implements StringEncoder {
             return 4;
         case 0:
             return 5;
-        default :
+        default:
             return -1;
         }
     }

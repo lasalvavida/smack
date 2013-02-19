@@ -263,11 +263,12 @@ public abstract class Packet {
     }
 
     /**
-     * Adds a packet extension to the packet.
+     * Adds a packet extension to the packet. Does nothing if extension is null.
      *
      * @param extension a packet extension.
      */
     public void addExtension(PacketExtension extension) {
+        if (extension == null) return;
         packetExtensions.add(extension);
     }
 

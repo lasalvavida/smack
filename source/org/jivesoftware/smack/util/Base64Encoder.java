@@ -20,6 +20,19 @@ package org.jivesoftware.smack.util;
  */
 public class Base64Encoder implements StringEncoder {
 
+    private static Base64Encoder instance;
+
+    private Base64Encoder() {
+        // Use getInstance()
+    }
+
+    public static Base64Encoder getInstance() {
+        if (instance == null) {
+            instance = new Base64Encoder();
+        }
+        return instance;
+    }
+
     public String encode(String s) {
         return Base64.encodeBytes(s.getBytes());
     }
@@ -27,5 +40,5 @@ public class Base64Encoder implements StringEncoder {
     public String decode(String s) {
         return new String(Base64.decode(s));
     }
-    
+
 }
