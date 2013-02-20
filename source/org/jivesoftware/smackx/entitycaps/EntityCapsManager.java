@@ -479,6 +479,8 @@ public class EntityCapsManager {
 
             @Override
             public List<PacketExtension> getNodePacketExtensions() {
+                // Do not return an List with just an 'null' entry
+                if (extendedInfo == null) return null;
                 List<PacketExtension> res = new LinkedList<PacketExtension>();
                 res.add(extendedInfo);
                 return res;
