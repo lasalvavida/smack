@@ -460,7 +460,7 @@ public class EntityCapsManager {
         sdm.setNodeInformationProvider(ENTITY_NODE + '#' + currentCapsVersion, new NodeInformationProvider() {
             List<String> features = sdm.getFeaturesList();
             List<Identity> identities = new LinkedList<Identity>(ServiceDiscoveryManager.getIdentities());
-            DataForm extendedInfo = sdm.getExtendedInfo();
+            List<PacketExtension> packetExtensions = sdm.getExtendedInfoAsList();
 
             @Override
             public List<Item> getNodeItems() {
@@ -479,11 +479,7 @@ public class EntityCapsManager {
 
             @Override
             public List<PacketExtension> getNodePacketExtensions() {
-                // Do not return an List with just an 'null' entry
-                if (extendedInfo == null) return null;
-                List<PacketExtension> res = new LinkedList<PacketExtension>();
-                res.add(extendedInfo);
-                return res;
+                return packetExtensions;
             }
         });
 

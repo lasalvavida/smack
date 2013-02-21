@@ -456,6 +456,21 @@ public class ServiceDiscoveryManager {
     }
 
     /**
+     * Returns the data form as List of PacketExtensions, or null if no data form is set.
+     * This representation is needed by some classes (e.g. EntityCapsManager, NodeInformationProvider)
+     * 
+     * @return
+     */
+    public List<PacketExtension> getExtendedInfoAsList() {
+        List<PacketExtension> res = null;
+        if (extendedInfo != null) {
+            res = new ArrayList<PacketExtension>(1);
+            res.add(extendedInfo);
+        }
+        return res;
+    }
+
+    /**
      * Removes the data form containing extended service discovery information
      * from the information returned by this XMPP entity.<p>
      *
