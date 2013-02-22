@@ -75,12 +75,4 @@ public class JavaxResolver extends DNSResolver {
         }
         return res;
     }
-
-    @Override
-    public Set<HostAddress> lookupHostnamesRecords(String name) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-
 }

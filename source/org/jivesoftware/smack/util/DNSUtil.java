@@ -25,12 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jivesoftware.smack.util.dns.ReflectionDNSJava;
 import org.jivesoftware.smack.util.dns.DNSResolver;
 import org.jivesoftware.smack.util.dns.HostAddress;
-import org.jivesoftware.smack.util.dns.ReflectionJavaxDNS;
 import org.jivesoftware.smack.util.dns.SRVRecord;
-
 
 /**
  * Utilty class to perform DNS lookups for XMPP services.
@@ -80,7 +77,7 @@ public class DNSUtil {
      *      server can be reached at for the specified domain.
      */
     public static HostAddress resolveXMPPDomain(String domain) {
-        List<HostAddress> addresses = resolveDomain("_xmpp-client._tcp." + domain, 'c');
+        List<HostAddress> addresses = resolveDomain(domain, 'c');
         return addresses.get(0);
     }
 
@@ -102,7 +99,7 @@ public class DNSUtil {
      *      server can be reached at for the specified domain.
      */
     public static HostAddress resolveXMPPServerDomain(String domain) {
-        List<HostAddress> addresses = resolveDomain("_xmpp-server._tcp." + domain, 's');
+        List<HostAddress> addresses = resolveDomain(domain, 's');
         return addresses.get(0);
     }
 
@@ -118,18 +115,26 @@ public class DNSUtil {
         }
 
         if (dnsResolver == null)
-            throw new IllegalStateException("No supported DNS resolver found");
+            throw new IllegalStateException("No DNS resolver active.");
 
         List<HostAddress> addresses = new ArrayList<HostAddress>();
 
         // Step one: Do SRV lookups
-        List<SRVRecord> srvRecords = dnsResolver.lookupSRVRecords("_xmpp-server._tcp." + domain);
+        String srvDomain;
+        if (keyPrefix == 's') {
+            srvDomain = "_xmpp-server._tcp." + domain;
+        } else if (keyPrefix == 'c') {
+            srvDomain = "_xmpp-client._tcp." + domain;
+        } else {
+            srvDomain = domain;
+        }
+        List<SRVRecord> srvRecords = dnsResolver.lookupSRVRecords(srvDomain);
         Collections.sort(srvRecords);
         addresses.addAll(srvRecords);
 
         // Step two: Add hostname records to the end of the list
         Set<HostAddress> fqdns = dnsResolver.lookupHostnamesRecords(domain);
-        addresses.
+        addresses.addAll(fqdns);
 
         // Add item to cache.
         cache.put(key, addresses);

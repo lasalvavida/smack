@@ -7,7 +7,7 @@ public class HostAddress {
     HostAddress(String fqdn) throws Exception {
         if (fqdn == null)
             throw new Exception("DNS SRV records must come with a FQDN");
-        if (fqdn.charAt(fqdn.length()) == '.') {
+        if (fqdn.charAt(fqdn.length() - 1) == '.') {
             this.fqdn = fqdn.substring(0, fqdn.length() - 1);
         } else {
             this.fqdn = fqdn;
