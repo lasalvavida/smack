@@ -2,13 +2,12 @@ package org.jivesoftware.smack.util.dns;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class DNSJava extends DNSResolver {
+public class ReflectionDNSJava extends DNSResolver {
     private static Class<?> lookupClass = null;
     private static Class<?> recordClass = null;
     private static Class<?> srvRecordClass = null;
@@ -25,6 +24,19 @@ public class DNSJava extends DNSResolver {
     private static int typeSRVValue;
     
     private static boolean supported = false;
+    
+    private static ReflectionDNSJava instance;
+    
+    private ReflectionDNSJava() {
+        
+    }
+    
+    public static DNSResolver maybeGetInstance() {
+        if (instance == null && supported) {
+            instance = new ReflectionDNSJava();
+        }
+        return instance;
+    }
     
     static {
         boolean initFailed = false;
@@ -59,12 +71,7 @@ public class DNSJava extends DNSResolver {
         if (!initFailed)
             supported = true;
     }
-
-    @Override
-    public boolean isSupported() {
-        return supported;
-    }
-
+    
     @Override
     public List<SRVRecord> lookupSRVRecords(String name) {
         List<SRVRecord> res = new ArrayList<SRVRecord>();
@@ -101,16 +108,6 @@ public class DNSJava extends DNSResolver {
         }
 
         return res;
-    }
-
-    @Override
-    public Set<HostAddress> lookupARecords(String name) {
-        return null;
-    }
-
-    @Override
-    public Set<HostAddress> lookupAAAARecords(String name) {
-        return null;
     }
 
 }

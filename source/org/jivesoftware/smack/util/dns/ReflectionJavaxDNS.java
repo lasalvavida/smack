@@ -8,7 +8,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
-public class JavaxDNS extends DNSResolver {
+public class ReflectionJavaxDNS extends DNSResolver {
     private static Class<?> namingEnumerationClass = null;
     private static Class<?> attributeClass = null;
     private static Class<?> attributesClass = null;
@@ -62,8 +62,17 @@ public class JavaxDNS extends DNSResolver {
             supported = true;
     }
 
-    public boolean isSupported() {
-        return supported;
+    private static ReflectionJavaxDNS instance;
+    
+    private ReflectionJavaxDNS() {
+        
+    }
+    
+    public static DNSResolver maybeGetInstance() {
+        if (instance == null && supported) {
+            instance = new ReflectionJavaxDNS();
+        }
+        return instance;
     }
     
     @Override
@@ -101,16 +110,6 @@ public class JavaxDNS extends DNSResolver {
         }
         
         return res;
-    }
-
-    @Override
-    public Set<HostAddress> lookupARecords(String name) {
-        return null;
-    }
-
-    @Override
-    public Set<HostAddress> lookupAAAARecords(String name) {
-        return null;
     }
 
 }

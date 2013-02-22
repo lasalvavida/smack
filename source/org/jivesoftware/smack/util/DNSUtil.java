@@ -23,11 +23,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.jivesoftware.smack.util.dns.DNSJava;
+import org.jivesoftware.smack.util.dns.ReflectionDNSJava;
 import org.jivesoftware.smack.util.dns.DNSResolver;
 import org.jivesoftware.smack.util.dns.HostAddress;
-import org.jivesoftware.smack.util.dns.JavaxDNS;
+import org.jivesoftware.smack.util.dns.ReflectionJavaxDNS;
 import org.jivesoftware.smack.util.dns.SRVRecord;
 
 
@@ -44,15 +45,14 @@ public class DNSUtil {
      */
     private static Map<String, List<HostAddress>> cache = new Cache<String, List<HostAddress>>(100, 1000*60*10);
 
-    private static List<DNSResolver> dnsResolvers = new ArrayList<DNSResolver>(2);
+    private static DNSResolver dnsResolver = null;
 
-    static {
-        DNSResolver javaxResolver = new JavaxDNS();
-        DNSResolver dnsjavaResolver = new DNSJava();
-        if (javaxResolver.isSupported())
-            dnsResolvers.add(javaxResolver);
-        if (dnsjavaResolver.isSupported())
-            dnsResolvers.add(dnsjavaResolver);
+    public static void setDNSResolver(DNSResolver resolver) {
+        dnsResolver = resolver;
+    }
+
+    public static DNSResolver getDNSResolver() {
+        return dnsResolver;
     }
 
     /**
@@ -117,7 +117,6 @@ public class DNSUtil {
             }
         }
 
-        DNSResolver dnsResolver = dnsResolvers.get(0);
         if (dnsResolver == null)
             throw new IllegalStateException("No supported DNS resolver found");
 
@@ -128,9 +127,9 @@ public class DNSUtil {
         Collections.sort(srvRecords);
         addresses.addAll(srvRecords);
 
-        // Step two: Add A records to the end of the list
-
-        // Step three: Add AAAA records to the end of the list
+        // Step two: Add hostname records to the end of the list
+        Set<HostAddress> fqdns = dnsResolver.lookupHostnamesRecords(domain);
+        addresses.
 
         // Add item to cache.
         cache.put(key, addresses);
