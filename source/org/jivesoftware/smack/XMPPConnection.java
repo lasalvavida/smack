@@ -95,6 +95,11 @@ public class XMPPConnection extends Connection {
      */
     private Collection<String> compressionMethods;
 
+    /**
+     * Set to true by packet writer if the server acknowledged the compression
+     */
+    private boolean serverAckdCompression = false;
+
 
     /**
      * Creates a new connection to the specified XMPP server. A DNS SRV lookup will be
@@ -577,6 +582,7 @@ public class XMPPConnection extends Connection {
         boolean isFirstInitialization = packetReader == null || packetWriter == null;
         if (!isFirstInitialization) {
             compressionHandler = null;
+            serverAckdCompression = false;
         }
 
         // Set the reader and writer instance variables
@@ -883,7 +889,7 @@ public class XMPPConnection extends Connection {
     }
 
     public boolean isUsingCompression() {
-        return compressionHandler != null;
+        return compressionHandler != null && serverAckdCompression;
     }
 
     /**
@@ -945,6 +951,7 @@ public class XMPPConnection extends Connection {
      * @throws Exception if there is an exception starting stream compression.
      */
     void startStreamCompression() throws Exception {
+        serverAckdCompression = true;
         // Initialize the reader and writer with the new secured version
         initReaderAndWriter();
 
