@@ -22,6 +22,7 @@ package org.jivesoftware.smack;
 
 import org.jivesoftware.smack.proxy.ProxyInfo;
 import org.jivesoftware.smack.util.DNSUtil;
+import org.jivesoftware.smack.util.dns.HostAddress;
 
 import javax.net.SocketFactory;
 import javax.security.auth.callback.CallbackHandler;
@@ -96,12 +97,11 @@ public class ConnectionConfiguration implements Cloneable {
      */
     public ConnectionConfiguration(String serviceName) {
         // Perform DNS lookup to get host and port to use
-        DNSUtil.HostAddress address = DNSUtil.resolveXMPPDomain(serviceName);
-        init(address.getHost(), address.getPort(), serviceName, 
-			ProxyInfo.forDefaultProxy());
+        HostAddress address = DNSUtil.resolveXMPPDomain(serviceName);
+        init(address.getFQDN(), address.getPort(), serviceName, ProxyInfo.forDefaultProxy());
     }
-	
-	/**
+
+     /**
      * Creates a new ConnectionConfiguration for the specified service name 
      * with specified proxy.
      * A DNS SRV lookup will be performed to find out the actual host address
@@ -112,8 +112,8 @@ public class ConnectionConfiguration implements Cloneable {
      */
     public ConnectionConfiguration(String serviceName,ProxyInfo proxy) {
         // Perform DNS lookup to get host and port to use
-        DNSUtil.HostAddress address = DNSUtil.resolveXMPPDomain(serviceName);
-        init(address.getHost(), address.getPort(), serviceName, proxy);
+        HostAddress address = DNSUtil.resolveXMPPDomain(serviceName);
+        init(address.getFQDN(), address.getPort(), serviceName, proxy);
     }
 
     /**
