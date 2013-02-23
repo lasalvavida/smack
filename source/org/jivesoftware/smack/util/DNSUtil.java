@@ -21,16 +21,18 @@ package org.jivesoftware.smack.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.jivesoftware.smack.util.dns.DNSResolver;
 import org.jivesoftware.smack.util.dns.HostAddress;
 import org.jivesoftware.smack.util.dns.SRVRecord;
 
 /**
- * Utilty class to perform DNS lookups for XMPP services.
+ * Utility class to perform DNS lookups for XMPP services.
  *
  * @author Matt Tucker
  */
@@ -44,16 +46,26 @@ public class DNSUtil {
 
     private static DNSResolver dnsResolver = null;
 
+    /**
+     * Set the DNS resolver that should be used to perform DNS lookups.
+     *
+     * @param resolver
+     */
     public static void setDNSResolver(DNSResolver resolver) {
         dnsResolver = resolver;
     }
 
+    /**
+     * Returns the current DNS resolved used to perform DNS lookups.
+     *
+     * @return
+     */
     public static DNSResolver getDNSResolver() {
         return dnsResolver;
     }
 
     /**
-     * Returns the host name and port that the specified XMPP server can be
+     * Returns a list of HostAddresses under which the specified XMPP server can be
      * reached at for client-to-server communication. A DNS lookup for a SRV
      * record in the form "_xmpp-client._tcp.example.com" is attempted, according
      * to section 14.4 of RFC 3920. If that lookup fails, a lookup in the older form
@@ -64,25 +76,17 @@ public class DNSUtil {
      * of 5222.<p>
      *
      * As an example, a lookup for "example.com" may return "im.example.com:5269".
-     * 
-     * Note on SRV record selection.
-     * We now check priority and weight, but we still don't do this correctly.
-     * The missing behavior is this: if we fail to reach a host based on its SRV
-     * record then we need to select another host from the other SRV records.
-     * In Smack 3.1.1 we're not going to be able to do the major system redesign to
-     * correct this.
      *
      * @param domain the domain.
-     * @return a HostAddress, which encompasses the hostname and port that the XMPP
-     *      server can be reached at for the specified domain.
+     * @return List of HostAddress, which encompasses the hostname and port that the
+     *      XMPP server can be reached at for the specified domain.
      */
-    public static HostAddress resolveXMPPDomain(String domain) {
-        List<HostAddress> addresses = resolveDomain(domain, 'c');
-        return addresses.get(0);
+    public static List<HostAddress> resolveXMPPDomain(String domain) {
+        return resolveDomain(domain, 'c');
     }
 
     /**
-     * Returns the host name and port that the specified XMPP server can be
+     * Returns a list of HostAddresses under which the specified XMPP server can be
      * reached at for server-to-server communication. A DNS lookup for a SRV
      * record in the form "_xmpp-server._tcp.example.com" is attempted, according
      * to section 14.4 of RFC 3920. If that lookup fails, a lookup in the older form
@@ -95,12 +99,11 @@ public class DNSUtil {
      * As an example, a lookup for "example.com" may return "im.example.com:5269".
      *
      * @param domain the domain.
-     * @return a HostAddress, which encompasses the hostname and port that the XMPP
-     *      server can be reached at for the specified domain.
+     * @return List of HostAddress, which encompasses the hostname and port that the
+     *      XMPP server can be reached at for the specified domain.
      */
-    public static HostAddress resolveXMPPServerDomain(String domain) {
-        List<HostAddress> addresses = resolveDomain(domain, 's');
-        return addresses.get(0);
+    public static List<HostAddress> resolveXMPPServerDomain(String domain) {
+        return resolveDomain(domain, 's');
     }
 
     private static List<HostAddress> resolveDomain(String domain, char keyPrefix) {
@@ -129,16 +132,98 @@ public class DNSUtil {
             srvDomain = domain;
         }
         List<SRVRecord> srvRecords = dnsResolver.lookupSRVRecords(srvDomain);
-        Collections.sort(srvRecords);
-        addresses.addAll(srvRecords);
+        List<HostAddress> sortedRecords = sortSRVRecords(srvRecords);
+        if (sortedRecords != null)
+            addresses.addAll(sortedRecords);
 
-        // Step two: Add hostname records to the end of the list
-        Set<HostAddress> fqdns = dnsResolver.lookupHostnamesRecords(domain);
-        addresses.addAll(fqdns);
+        // Step two: Add the hostname to the end of the list
+        addresses.add(new HostAddress(domain));
 
         // Add item to cache.
         cache.put(key, addresses);
 
         return addresses;
+    }
+
+    /**
+     * Sort a given list of SRVRecords as described in RFC 2782
+     * Note that we follow the RFC with one exception. In a group of the same priority, only the first entry
+     * is calculated by random. The others are ore simply ordered by their priority.
+     * 
+     * @param records
+     * @return
+     */
+    protected static List<HostAddress> sortSRVRecords(List<SRVRecord> records) {
+        // RFC 2782, Usage rules: "If there is precisely one SRV RR, and its Target is "."
+        // (the root domain), abort."
+        if (records.size() == 1 && records.get(0).getFQDN().equals("."))
+            return null;
+
+        // sorting the records improves the performance of the bisection later
+        Collections.sort(records);
+
+        // create the priority buckets
+        SortedMap<Integer, List<SRVRecord>> buckets = new TreeMap<Integer, List<SRVRecord>>();
+        for (SRVRecord r : records) {
+            Integer priority = r.getPriority();
+            List<SRVRecord> bucket = buckets.get(priority);
+            // create the list of SRVRecords if it doesn't exist
+            if (bucket == null) {
+                bucket = new LinkedList<SRVRecord>();
+                buckets.put(priority, bucket);
+            }
+            bucket.add(r);
+        }
+
+        List<HostAddress> res = new ArrayList<HostAddress>(records.size());
+
+        for (Integer priority : buckets.keySet()) {
+            List<SRVRecord> bucket = buckets.get(priority);
+            int bucketSize;
+            while ((bucketSize = bucket.size()) > 0) {
+                int[] totals = new int[bucket.size()];
+                int running_total = 0;
+                int count = 0;
+                int zeroWeight = 1;
+
+                for (SRVRecord r : bucket) {
+                    if (r.getWeight() > 0)
+                        zeroWeight = 0;
+                }
+
+                for (SRVRecord r : bucket) {
+                    running_total += (r.getWeight() + zeroWeight);
+                    totals[count] = running_total;
+                    count++;
+                }
+                int selectedPos;
+                if (running_total == 0) {
+                    // If running total is 0, then all weights in this priority
+                    // group are 0. So we simply select one of the weights randomly
+                    // as the other 'normal' algorithm is unable to handle this case
+                    selectedPos = (int) (Math.random() * bucketSize);
+                } else {
+                    double rnd = Math.random() * running_total;
+                    selectedPos = bisect(totals, rnd);
+                } 
+                // add the SRVRecord that was randomly chosen on it's weight
+                // to the start of the result list
+                SRVRecord chosenSRVRecord = bucket.remove(selectedPos);
+                res.add(chosenSRVRecord);
+            }
+        }
+
+        return res;
+    }
+
+    // TODO this is not yet really bisection just a stupid linear search
+    private static int bisect(int[] array, double value) {
+        int pos = 0;
+        for (int element : array) {
+            if (value < element)
+                break;
+            pos++;
+        }
+        return pos;
     }
 }
