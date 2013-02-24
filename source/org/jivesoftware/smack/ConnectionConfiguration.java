@@ -51,7 +51,7 @@ public class ConnectionConfiguration implements Cloneable {
 
     private String host;
     private int port;
-    private List<HostAddress> hostAddresses;
+    protected List<HostAddress> hostAddresses;
 
     private String truststorePath;
     private String truststoreType;
