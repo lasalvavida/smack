@@ -1,3 +1,18 @@
+/**
+ * Copyright 2013 Florian Schmaus
+ *
+ * All rights reserved. Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jivesoftware.smack.compression;
 
 import java.io.IOException;
@@ -10,6 +25,15 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
+/**
+ * This class provides XMPP "zlib" compression with the help of the Deflater class of the Java API.
+ * Not that the method needed is available since Java7, so this class will only work with Java7
+ * or higher (hence it's name).
+ * 
+ * @author Florian Schmaus
+ * @see <a href="http://docs.oracle.com/javase/7/docs/api/java/util/zip/Deflater.html#deflate(byte[], int, int, int)">The required deflate() method</a>
+ *
+ */
 public class Java7ZlibInputOutputStream extends XMPPInputOutputStream {
     private final static Method method;
     private final static boolean supported;
