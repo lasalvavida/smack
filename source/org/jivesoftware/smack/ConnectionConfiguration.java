@@ -184,7 +184,7 @@ public class ConnectionConfiguration implements Cloneable {
         init(host, proxy);
     }
 
-    private void init(String serviceName, ProxyInfo proxy) {
+    protected void init(String serviceName, ProxyInfo proxy) {
         this.serviceName = serviceName;
         this.proxy = proxy;
 
