@@ -51,7 +51,6 @@ public final class SmackConfiguration {
     private static final String SMACK_VERSION = "3.2.2";
 
     private static int packetReplyTimeout = 5000;
-    private static int keepAliveInterval = 30000;
     private static Vector<String> defaultMechs = new Vector<String>();
 
     private static boolean localSocks5ProxyEnabled = true;
@@ -93,9 +92,6 @@ public final class SmackConfiguration {
                                 }
                                 else if (parser.getName().equals("packetReplyTimeout")) {
                                     packetReplyTimeout = parseIntProperty(parser, packetReplyTimeout);
-                                }
-                                else if (parser.getName().equals("keepAliveInterval")) {
-                                    keepAliveInterval = parseIntProperty(parser, keepAliveInterval);
                                 }
                                 else if (parser.getName().equals("mechName")) {
                                     defaultMechs.add(parser.nextText());
@@ -170,30 +166,6 @@ public final class SmackConfiguration {
             throw new IllegalArgumentException();
         }
         packetReplyTimeout = timeout;
-    }
-
-    /**
-     * Returns the number of milleseconds delay between sending keep-alive
-     * requests to the server. The default value is 30000 ms. A value of -1
-     * mean no keep-alive requests will be sent to the server.
-     *
-     * @return the milliseconds to wait between keep-alive requests, or -1 if
-     *      no keep-alive should be sent.
-     */
-    public static int getKeepAliveInterval() {
-        return keepAliveInterval;
-    }
-
-    /**
-     * Sets the number of milleseconds delay between sending keep-alive
-     * requests to the server. The default value is 30000 ms. A value of -1
-     * mean no keep-alive requests will be sent to the server.
-     *
-     * @param interval the milliseconds to wait between keep-alive requests,
-     *      or -1 if no keep-alive should be sent.
-     */
-    public static void setKeepAliveInterval(int interval) {
-        keepAliveInterval = interval;
     }
 
     /**
