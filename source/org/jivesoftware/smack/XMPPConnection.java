@@ -569,6 +569,7 @@ public class XMPPConnection extends Connection {
                 config.setUsedHostAddress(hostAddress);
                 break;
             } else {
+                hostAddress.setException(exception);
                 failedAddresses.add(hostAddress);
                 if (!it.hasNext()) {
                     // There are no more host addresses to try
