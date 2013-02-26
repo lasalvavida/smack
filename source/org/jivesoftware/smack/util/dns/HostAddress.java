@@ -19,6 +19,12 @@ public class HostAddress {
     private String fqdn;
     private int port;
     
+    /**
+     * Creates a new HostAddress with the given FQDN. The port will be set to the default XMPP client port: 5222
+     * 
+     * @param fqdn
+     * @throws IllegalArgumentException
+     */
     public HostAddress(String fqdn) throws IllegalArgumentException{
         if (fqdn == null)
             throw new IllegalArgumentException("FQDN is null");
@@ -27,7 +33,8 @@ public class HostAddress {
         } else {
             this.fqdn = fqdn;
         }
-        this.port = -1;
+        // Set port to the default port for XMPP client communication
+        this.port = 5222;
     }
     
     public HostAddress(String fqdn, int port) throws IllegalArgumentException {
