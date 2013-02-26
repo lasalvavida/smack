@@ -44,6 +44,8 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Creates a socket connection to a XMPP server. This is the default connection
@@ -540,6 +542,8 @@ public class XMPPConnection extends Connection {
     private void connectUsingConfiguration(ConnectionConfiguration config) throws XMPPException {
         XMPPException exception = null;
         Iterator<HostAddress> it = config.getHostAddresses().iterator();
+        List<HostAddress> failedAddresses = new LinkedList<HostAddress>();
+        boolean xmppIOError = false;
         while (it.hasNext()) {
             HostAddress hostAddress = it.next();
             String host = hostAddress.getFQDN();
@@ -559,12 +563,29 @@ public class XMPPConnection extends Connection {
                 String errorMessage = "XMPPError connecting to " + host + ":" + port + ".";
                 exception = new XMPPException(errorMessage, new XMPPError(XMPPError.Condition.remote_server_error,
                         errorMessage), ioe);
+                xmppIOError = true;
             }
             if (exception == null) {
                 config.setUsedHostAddress(hostAddress);
                 break;
-            } else if (exception != null && !it.hasNext()) {
-                throw exception;
+            } else {
+                failedAddresses.add(hostAddress);
+                if (!it.hasNext()) {
+                    // There are no more host addresses to try
+                    // report all tried host addresses in the exception
+                    StringBuilder sb  = new StringBuilder();
+                    for (HostAddress fha : failedAddresses) {
+                        sb.append(fha.getErrorMessage());
+                        sb.append("; ");
+                    }
+                    XMPPError xmppError;
+                    if (xmppIOError) {
+                        xmppError = new XMPPError(XMPPError.Condition.remote_server_error);
+                    } else {
+                        xmppError = new XMPPError(XMPPError.Condition.remote_server_timeout);
+                    }
+                    throw new XMPPException(sb.toString(), xmppError);
+                }
             }
         }
         socketClosed = false;
