@@ -65,6 +65,7 @@ public abstract class SmackTestCase extends TestCase {
     private Map<String, String> accountCreationParameters = new HashMap<String, String>();
     private boolean samePassword;
     private List<Integer> createdUserIdx = new ArrayList<Integer>();
+    private boolean compressionEnabled = false;
 
     private String[] usernames;
     private String[] passwords;
@@ -149,7 +150,7 @@ public abstract class SmackTestCase extends TestCase {
     protected XMPPConnection createConnection() {
         // Create the configuration for this new connection
         ConnectionConfiguration config = new ConnectionConfiguration(host, port);
-        config.setCompressionEnabled(Boolean.getBoolean("test.compressionEnabled"));
+        config.setCompressionEnabled(compressionEnabled);
         config.setSendPresence(sendInitialPresence());
         if (getSocketFactory() == null) {
             config.setSocketFactory(getSocketFactory());
@@ -456,6 +457,9 @@ public abstract class SmackTestCase extends TestCase {
                             value = parser.getAttributeValue(i);
                             accountCreationParameters.put(key, value);
                         }
+                    }
+                    else if (parser.getName().equals("compressionEnabled")) {
+                        compressionEnabled = "true".equals(parser.nextText());
                     }
                 }
                 eventType = parser.next();
