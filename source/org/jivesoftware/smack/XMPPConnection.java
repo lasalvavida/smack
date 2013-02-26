@@ -545,6 +545,7 @@ public class XMPPConnection extends Connection {
         List<HostAddress> failedAddresses = new LinkedList<HostAddress>();
         boolean xmppIOError = false;
         while (it.hasNext()) {
+            exception = null;
             HostAddress hostAddress = it.next();
             String host = hostAddress.getFQDN();
             int port = hostAddress.getPort();
