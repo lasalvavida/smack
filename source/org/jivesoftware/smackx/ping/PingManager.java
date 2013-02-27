@@ -21,10 +21,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-import org.jivesoftware.smack.AbstractConnectionListener;
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.ConnectionCreationListener;
+import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.PacketCollector;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.SmackConfiguration;
@@ -55,6 +59,7 @@ public class PingManager {
     public static final String NAMESPACE = "urn:xmpp:ping";
     public static final String ELEMENT = "ping";
     
+
     private static Map<Connection, PingManager> instances =
             Collections.synchronizedMap(new WeakHashMap<Connection, PingManager>());
     
@@ -66,12 +71,14 @@ public class PingManager {
         });
     }
     
+    private ScheduledExecutorService periodicPingExecutorService;
     private Connection connection;
-    private Thread serverPingThread;
-    private ServerPingTask serverPingTask;
     private int pingInterval = SmackConfiguration.getDefaultPingInterval();
     private Set<PingFailedListener> pingFailedListeners = Collections
             .synchronizedSet(new HashSet<PingFailedListener>());
+    private ScheduledFuture<?> periodicPingTask;
+    protected volatile long lastSuccessfulPing = -1;
+
     
     // Ping Flood protection
     private long pingMinDelta = 100;
@@ -84,11 +91,40 @@ public class PingManager {
         ServiceDiscoveryManager sdm = ServiceDiscoveryManager.getInstanceFor(connection);
         sdm.addFeature(NAMESPACE);
         this.connection = connection;
+        init();
+    }
+    
+    private void init() {
+        periodicPingExecutorService = new ScheduledThreadPoolExecutor(1);
         PacketFilter pingPacketFilter = new PacketTypeFilter(Ping.class);
         connection.addPacketListener(new PingPacketListener(), pingPacketFilter);
-        connection.addConnectionListener(new PingConnectionListener());
+        connection.addConnectionListener(new ConnectionListener() {
+
+            @Override
+            public void connectionClosed() {
+                maybeStopPingServerTask();
+            }
+
+            @Override
+            public void connectionClosedOnError(Exception arg0) {
+                maybeStopPingServerTask();
+            }
+
+            @Override
+            public void reconnectionSuccessful() {
+                maybeSchedulePingServerTask();
+            }
+
+            @Override
+            public void reconnectingIn(int seconds) {
+            }
+
+            @Override
+            public void reconnectionFailed(Exception e) {
+            }
+        });
         instances.put(connection, this);
-        maybeStartPingServerTask();
+        maybeSchedulePingServerTask();
     }
     
     public static PingManager getInstanceFor(Connection connection) {
@@ -100,14 +136,11 @@ public class PingManager {
         
         return pingManager;
     }
-    
+
     public void setPingIntervall(int pingIntervall) {
         this.pingInterval = pingIntervall;
-        if (serverPingTask != null) {
-            serverPingTask.setPingInterval(pingIntervall);
-        }
     }
-    
+
     public int getPingIntervall() {
         return pingInterval;
     }
@@ -257,57 +290,30 @@ public class PingManager {
      * @return
      */
     public long getLastSuccessfulPing() {
-        long taskLastSuccessfulPing = -1;
-        if (serverPingTask != null) {
-            taskLastSuccessfulPing = serverPingTask.getLastSucessfulPing();
-        }
-        return Math.max(taskLastSuccessfulPing, lastServerPingStamp);
+        return Math.max(lastSuccessfulPing, lastServerPingStamp);
     }
     
     protected Set<PingFailedListener> getPingFailedListeners() {
         return pingFailedListeners;
     }
-    
-    private class PingConnectionListener extends AbstractConnectionListener {
 
-        @Override
-        public void connectionClosed() {
-            maybeStopPingServerTask();
-        }
-
-        @Override
-        public void connectionClosedOnError(Exception arg0) {
-            maybeStopPingServerTask();
-        }
-
-        @Override
-        public void reconnectionSuccessful() {
-            maybeStartPingServerTask();
-        }
-
-    }
-    
-    private void maybeStartPingServerTask() {
-        if (serverPingTask != null) {
-            serverPingTask.setDone();
-            serverPingThread.interrupt();
-            serverPingTask = null;
-            serverPingThread = null;
-        }
-        
+    /**
+     * Cancels any existing periodic ping task if there is one and schedules a new ping task if pingInterval is greater
+     * then zero.
+     * 
+     */
+    protected synchronized void maybeSchedulePingServerTask() {
+        maybeStopPingServerTask();
         if (pingInterval > 0) {
-            serverPingTask = new ServerPingTask(connection, pingInterval);
-            serverPingThread = new Thread(serverPingTask);
-            serverPingThread.setDaemon(true);
-            serverPingThread.setName("Smack Ping Server Task (" + connection.getServiceName() + ")");
-            serverPingThread.start();
+            periodicPingTask = periodicPingExecutorService.schedule(new ServerPingTask(connection), pingInterval,
+                    TimeUnit.SECONDS);
         }
     }
-    
+
     private void maybeStopPingServerTask() {
-        if (serverPingThread != null) {
-            serverPingTask.setDone();
-            serverPingThread.interrupt();
+        if (periodicPingTask != null) {
+            periodicPingTask.cancel(true);
+            periodicPingTask = null;
         }
     }
 
