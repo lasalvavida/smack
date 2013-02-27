@@ -59,7 +59,7 @@ class ServerPingTask implements Runnable {
                 res = pingManager.pingMyServer();
                 // stop when we receive a pong back
                 if (res) {
-                    pingManager.lastSuccessfulPing = System.currentTimeMillis();
+                    pingManager.lastSuccessfulPingByTask = System.currentTimeMillis();
                     break;
                 }
             }

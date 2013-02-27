@@ -77,15 +77,16 @@ public class PingManager {
     private Set<PingFailedListener> pingFailedListeners = Collections
             .synchronizedSet(new HashSet<PingFailedListener>());
     private ScheduledFuture<?> periodicPingTask;
-    protected volatile long lastSuccessfulPing = -1;
+    protected volatile long lastSuccessfulPingByTask = -1;
 
     
     // Ping Flood protection
     private long pingMinDelta = 100;
     private long lastPingStamp = 0; // timestamp of the last received ping
     
-    // Last server pong timestamp if a ping request manually
-    private long lastServerPingStamp = -1;
+    // Timestamp of the last pong received, either from the server or another entity
+    // Note, no need to synchronize this value, it will only increase over time
+    private long lastSuccessfulManualPing = -1;
     
     private PingManager(Connection connection) {
         ServiceDiscoveryManager sdm = ServiceDiscoveryManager.getInstanceFor(connection);
@@ -97,7 +98,25 @@ public class PingManager {
     private void init() {
         periodicPingExecutorService = new ScheduledThreadPoolExecutor(1);
         PacketFilter pingPacketFilter = new PacketTypeFilter(Ping.class);
-        connection.addPacketListener(new PingPacketListener(), pingPacketFilter);
+        connection.addPacketListener(new PacketListener() {
+            /**
+             * Sends a Pong for every Ping
+             */
+            public void processPacket(Packet packet) {
+                if (pingMinDelta > 0) {
+                    // Ping flood protection enabled
+                    long currentMillies = System.currentTimeMillis();
+                    long delta = currentMillies - lastPingStamp;
+                    lastPingStamp = currentMillies;
+                    if (delta < pingMinDelta) {
+                        return;
+                    }
+                }
+                Pong pong = new Pong((Ping)packet);
+                connection.sendPacket(pong);
+            }
+        }
+        , pingPacketFilter);
         connection.addConnectionListener(new ConnectionListener() {
 
             @Override
@@ -126,14 +145,14 @@ public class PingManager {
         instances.put(connection, this);
         maybeSchedulePingServerTask();
     }
-    
+
     public static PingManager getInstanceFor(Connection connection) {
         PingManager pingManager = instances.get(connection);
         
         if (pingManager == null) {
             pingManager = new PingManager(connection);
         }
-        
+
         return pingManager;
     }
 
@@ -222,11 +241,11 @@ public class PingManager {
      */
     public boolean pingEntity(String jid, long pingTimeout) {
         IQ result = ping(jid, pingTimeout);
-        
-        if (result == null 
-                || result.getType() == IQ.Type.ERROR) {
+
+        if (result == null || result.getType() == IQ.Type.ERROR) {
             return false;
-        } 
+        }
+        pongReceived();
         return true;
     }
     
@@ -251,7 +270,8 @@ public class PingManager {
             }
             return false;
         }
-        lastServerPingStamp = System.currentTimeMillis();
+        // Maybe not really a pong, but an answer is an answer
+        pongReceived();
         return true;
     }
     
@@ -290,7 +310,7 @@ public class PingManager {
      * @return
      */
     public long getLastSuccessfulPing() {
-        return Math.max(lastSuccessfulPing, lastServerPingStamp);
+        return Math.max(lastSuccessfulPingByTask, lastSuccessfulManualPing);
     }
     
     protected Set<PingFailedListener> getPingFailedListeners() {
@@ -317,26 +337,7 @@ public class PingManager {
         }
     }
 
-    private class PingPacketListener implements PacketListener {
-
-        public PingPacketListener() {
-        }
-        
-        /**
-         * Sends a Pong for every Ping
-         */
-        public void processPacket(Packet packet) {
-            if (pingMinDelta > 0) {
-                // Ping flood protection enabled
-                long currentMillies = System.currentTimeMillis();
-                long delta = currentMillies - lastPingStamp;
-                lastPingStamp = currentMillies;
-                if (delta < pingMinDelta) {
-                    return;
-                }
-            }
-            Pong pong = new Pong((Ping)packet);
-            connection.sendPacket(pong);
-        }
+    private void pongReceived() {
+        lastSuccessfulManualPing = System.currentTimeMillis();
     }
 }
