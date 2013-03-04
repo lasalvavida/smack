@@ -469,6 +469,10 @@ public class XMPPConnection extends Connection {
             return;
         }
 
+        if (!isConnected()) {
+            return;
+        }
+
         shutdown(unavailablePresence);
 
         if (roster != null) {
@@ -479,9 +483,7 @@ public class XMPPConnection extends Connection {
         wasAuthenticated = false;
 
         packetWriter.cleanup();
-        packetWriter = null;
         packetReader.cleanup();
-        packetReader = null;
     }
 
     public void sendPacket(Packet packet) {
@@ -580,10 +582,8 @@ public class XMPPConnection extends Connection {
      */
     private void initConnection() throws XMPPException {
         boolean isFirstInitialization = packetReader == null || packetWriter == null;
-        if (!isFirstInitialization) {
-            compressionHandler = null;
-            serverAckdCompression = false;
-        }
+        compressionHandler = null;
+        serverAckdCompression = false;
 
         // Set the reader and writer instance variables
         initReaderAndWriter();
@@ -1028,7 +1028,7 @@ public class XMPPConnection extends Connection {
 
     /**
      * Sends out a notification that there was an error with the connection
-     * and closes the connection.
+     * and closes the connection. Also prints the stack trace of the given exception
      *
      * @param e the exception that causes the connection close event.
      */
