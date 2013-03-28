@@ -825,6 +825,21 @@ public abstract class Connection {
     }
 
     /**
+     * Returns true if the connection is successfully established. What that means depends on the type
+     * of the connection: If it is an anonymous connection a connected connection is seen as established,
+     * if it is not an anonymous connection then only a authenticated connection is seen as established.
+     * 
+     * @return true if connection is established.
+     */
+    public boolean isEstablished() {
+        if (isAnonymous()) {
+            return isConnected();
+        } else {
+            return isAuthenticated();
+        }
+    }
+
+    /**
      * A wrapper class to associate a packet filter with a listener.
      */
     protected static class ListenerWrapper {

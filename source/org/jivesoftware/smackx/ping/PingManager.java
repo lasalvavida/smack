@@ -24,6 +24,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.jivesoftware.smack.Connection;
@@ -42,6 +43,8 @@ import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.jivesoftware.smackx.ping.packet.Ping;
 import org.jivesoftware.smackx.ping.packet.Pong;
+import org.jivesoftware.smackx.ping.PingManager;
+
 
 /**
  * Implements the XMPP Ping as defined by XEP-0199. This protocol offers an
@@ -71,7 +74,7 @@ public class PingManager {
         });
     }
 
-    private ScheduledExecutorService periodicPingExecutorService;
+    private static ScheduledExecutorService periodicPingExecutorService;
     private Connection connection;
     private int pingInterval = SmackConfiguration.getDefaultPingInterval();
     private Set<PingFailedListener> pingFailedListeners = Collections
@@ -96,7 +99,17 @@ public class PingManager {
     }
 
     private void init() {
-        periodicPingExecutorService = new ScheduledThreadPoolExecutor(1);
+        if (periodicPingExecutorService == null) {
+            periodicPingExecutorService = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable runnable) {
+                    Thread pingThread = new Thread(runnable, "Smack Server Ping");
+                    pingThread.setDaemon(true);
+                    return pingThread;
+                }
+            });
+        }
+
         PacketFilter pingPacketFilter = new PacketTypeFilter(Ping.class);
         connection.addPacketListener(new PacketListener() {
             /**
@@ -156,7 +169,7 @@ public class PingManager {
         return pingManager;
     }
 
-    public void setPingIntervall(int pingIntervall) {
+    public void setPingInterval(int pingIntervall) {
         this.pingInterval = pingIntervall;
     }
 

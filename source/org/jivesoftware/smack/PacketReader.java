@@ -48,6 +48,7 @@ class PacketReader {
 
     private XMPPConnection connection;
     private XmlPullParser parser;
+    private volatile long lastReceivedTimestamp = -1;
     volatile boolean done;
 
     private String connectionID = null;
@@ -276,6 +277,9 @@ class PacketReader {
                         connection.disconnect();
                     }
                 }
+                if (!connection.reader.ready()) {
+                    lastReceivedTimestamp = System.currentTimeMillis();
+                }
                 eventType = parser.next();
             } while (!done && eventType != XmlPullParser.END_DOCUMENT && thread == readerThread);
         }
@@ -288,6 +292,10 @@ class PacketReader {
                 connection.notifyConnectionError(e);
             }
         }
+    }
+
+    protected long getLastReceivedTimestamp() {
+        return lastReceivedTimestamp;
     }
 
     /**

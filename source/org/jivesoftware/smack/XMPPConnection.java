@@ -650,10 +650,6 @@ public class XMPPConnection extends Connection {
             // Make note of the fact that we're now connected.
             connected = true;
 
-            // Start keep alive process (after TLS was negotiated - if available)
-            packetWriter.startKeepAliveProcess();
-
-
             if (isFirstInitialization) {
                 // Notify listeners that a new connection has been established
                 for (ConnectionCreationListener listener : getConnectionCreationListeners()) {
@@ -1103,6 +1099,19 @@ public class XMPPConnection extends Connection {
                 // from a faulty listener
                 e.printStackTrace();
             }
+        }
+    }
+
+    /**
+     * The timestamp the PacketWriter did it's last flush()
+     * 
+     * @return
+     */
+    public long getLastReceivedTimestamp() {
+        if (packetWriter != null) {
+            return packetReader.getLastReceivedTimestamp();
+        } else {
+            return -1;
         }
     }
 }

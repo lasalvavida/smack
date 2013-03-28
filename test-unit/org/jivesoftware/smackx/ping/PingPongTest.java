@@ -15,8 +15,14 @@
  */
 package org.jivesoftware.smackx.ping;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
+import org.jivesoftware.smack.DummyConnection;
+import org.jivesoftware.smack.TestUtils;
+import org.jivesoftware.smack.ThreadedDummyConnection;
+import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.util.PacketParserUtils;
+import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.jivesoftware.smackx.ping.packet.Ping;
 import org.jivesoftware.smackx.ping.packet.Pong;
 import org.junit.Test;
@@ -35,4 +41,54 @@ public class PingPongTest {
         assertEquals(pong.getPacketID(), ping.getPacketID());
     }
 
+    @Test
+    public void checkFailedPingOnTimeout() throws Exception {
+        DummyConnection con = new DummyConnection();
+        PingManager pm = PingManager.getInstanceFor(con);
+
+        // DummyConnection will not reply so it will timeout
+        assertFalse(pm.pingEntity("test@myserver.com"));
+    }
+
+    @Test
+    public void checkSucessfulDiscoRequest() throws Exception {
+        ThreadedDummyConnection con = new ThreadedDummyConnection();
+        DiscoverInfo info = new DiscoverInfo();
+        info.addFeature(PingManager.NAMESPACE);
+
+        //@formatter:off
+        String reply =
+            "<iq type='result' id='qrzSp-16' to='test@myserver.com'>" +
+                "<query xmlns='http://jabber.org/protocol/disco#info'><identity category='client' type='pc' name='Pidgin'/>" +
+                    "<feature var='urn:xmpp:ping'/>" +
+                "</query>" +
+            "</iq>";
+        //@formatter:on
+        IQ discoReply = PacketParserUtils.parseIQ(TestUtils.getIQParser(reply), con);
+        con.addIQReply(discoReply);
+
+        PingManager pm = PingManager.getInstanceFor(con);
+        assertTrue(pm.isPingSupported("test@myserver.com"));
+    }
+
+    @Test
+    public void checkUnsucessfulDiscoRequest() throws Exception {
+        ThreadedDummyConnection con = new ThreadedDummyConnection();
+        DiscoverInfo info = new DiscoverInfo();
+        info.addFeature(PingManager.NAMESPACE);
+
+        //@formatter:off
+        String reply =
+            "<iq type='result' id='qrzSp-16' to='test@myserver.com'>" +
+                "<query xmlns='http://jabber.org/protocol/disco#info'><identity category='client' type='pc' name='Pidgin'/>" +
+                    "<feature var='urn:xmpp:noping'/>" +
+                "</query>" +
+            "</iq>";
+        //@formatter:on
+        IQ discoReply = PacketParserUtils.parseIQ(TestUtils.getIQParser(reply), con);
+        con.addIQReply(discoReply);
+
+        PingManager pm = PingManager.getInstanceFor(con);
+        assertFalse(pm.isPingSupported("test@myserver.com"));
+    }
 }

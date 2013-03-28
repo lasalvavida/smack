@@ -32,17 +32,25 @@ public class ThreadedDummyConnection extends DummyConnection
 {
 	private BlockingQueue<IQ>  replyQ = new ArrayBlockingQueue<IQ>(1);
 	private BlockingQueue<Packet>  messageQ = new LinkedBlockingQueue<Packet>(5);
+	private volatile boolean timeout = false;
 
 	@Override
 	public void sendPacket(Packet packet)
 	{
 		super.sendPacket(packet);
 
-		if ((packet instanceof IQ) && !replyQ.isEmpty())
+		if ((packet instanceof IQ) && !timeout)
 		{
+		    timeout = false;
 			// Set reply packet to match one being sent.  We haven't started the 
 			// other thread yet so this is still safe.
 			IQ replyPacket = replyQ.peek();
+
+			// If no reply has been set via addIQReply, then we create a simple reply
+			if (replyPacket == null) {
+			    replyPacket = IQ.createResultIQ((IQ) packet);
+			    replyQ.add(replyPacket);
+			}
 			replyPacket.setPacketID(packet.getPacketID());
 			replyPacket.setFrom(packet.getTo());
 			replyPacket.setTo(packet.getFrom());
@@ -50,6 +58,15 @@ public class ThreadedDummyConnection extends DummyConnection
 			
 			new ProcessQueue(replyQ).start();
 		}
+	}
+
+	/**
+	 * Calling this method will cause the next sendPacket call with an IQ packet to timeout.
+	 * This is accomplished by simply stoppinig the auto creating of the reply packet
+	 * or processing one that was entered via {@link #processPacket(Packet)}
+	 */
+	public void setTimeout() {
+	    timeout = true;
 	}
 	
 	public void addMessage(Message msgToProcess)
