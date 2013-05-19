@@ -28,6 +28,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
+import org.jivesoftware.smack.parsing.ParsingExceptionCallback;
+import org.jivesoftware.smack.parsing.ThrowException;
 import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
 
@@ -58,6 +60,7 @@ public final class SmackConfiguration {
     private static int localSocks5ProxyPort = 7777;
     private static int packetCollectorSize = 5000;
 
+    private static ParsingExceptionCallback defaultCallback = new ThrowException();
     /**
      * This automatically enables EntityCaps for new connections if it is set to true
      */
@@ -326,6 +329,14 @@ public final class SmackConfiguration {
      */
     public static void setAutoEnableEntityCaps(boolean b) {
         autoEnableEntityCaps = b;
+    }
+
+    public static void setDefaultParsingExceptionCallback(ParsingExceptionCallback callback) {
+        defaultCallback = callback;
+    }
+
+    public static ParsingExceptionCallback getDefaultParsingExceptionCallback() {
+        return defaultCallback;
     }
 
     private static void parseClassToLoad(XmlPullParser parser) throws Exception {
