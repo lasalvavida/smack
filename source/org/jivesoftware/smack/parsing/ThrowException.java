@@ -20,16 +20,22 @@
 
 package org.jivesoftware.smack.parsing;
 
-
+/**
+ * Parsing exception callback class that simply throws the encoutered parsing exception. This usually leads to an
+ * connectionClosedOnError disconnect of the connection.
+ * 
+ * @author Florian Schmaus
+ * 
+ */
 public class ThrowException extends ParsingExceptionCallback {
     public void messageParsingException(Exception e) throws Exception {
         throw e;
     }
-    
+
     public void iqParsingException(Exception e) throws Exception {
         throw e;
     }
-    
+
     public void presenceParsingException(Exception e) throws Exception {
         throw e;
     }

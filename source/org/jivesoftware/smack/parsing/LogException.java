@@ -20,16 +20,21 @@
 
 package org.jivesoftware.smack.parsing;
 
-
+/**
+ * Simple parsing exception callback that only logs the encountered parsing exception to stderr.
+ * 
+ * @author Florian Schmaus
+ * 
+ */
 public class LogException extends ParsingExceptionCallback {
     public void messageParsingException(Exception e) throws Exception {
         System.err.print(e);
     }
-    
+
     public void iqParsingException(Exception e) throws Exception {
         System.err.print(e);
     }
-    
+
     public void presenceParsingException(Exception e) throws Exception {
         System.err.print(e);
     }

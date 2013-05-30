@@ -60,7 +60,7 @@ public class ParsingExceptionTest {
     static class ThrowException implements PacketExtensionProvider {
         public static final String ELEMENT = "exception";
         public static final String NAMESPACE = "http://smack.jivesoftware.org/exception";
-        
+
         @Override
         public PacketExtension parseExtension(XmlPullParser parser) throws Exception {
             throw new XMPPException("Test Exception");

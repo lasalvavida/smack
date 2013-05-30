@@ -20,14 +20,47 @@
 
 package org.jivesoftware.smack.parsing;
 
-
+/**
+ * Base class to receive parsing exceptions
+ * 
+ * @author Florian Schmaus
+ *
+ */
 public abstract class ParsingExceptionCallback {
+
+    /**
+     * Called when parsing an message stanza caused an exception.
+     * 
+     * @param e
+     * the exception thrown while parsing the message stanza
+     * @param message
+     * the raw message stanza data that caused the exception
+     * @throws Exception
+     */
     public void messageParsingException(Exception e, UnparsedMessage message) throws Exception {
     }
-    
+
+    /**
+     * Called when parsing an IQ stanza caused an exception.
+     * 
+     * @param e
+     * the exception thrown while parsing the iq stanza
+     * @param iq
+     * the raw iq stanza data that caused the exception
+     * @throws Exception
+     */
     public void iqParsingException(Exception e, UnparsedIQ iq) throws Exception {
     }
-    
+
+    /**
+     * Called when parsing a presence stanza caused an exception.
+     * 
+     * @param e
+     * the exception thrown while parsing the presence stanza
+     * @param presence
+     * the raw presence stanza data that caused the exception
+     * @throws Exception
+     */
     public void presenceParsingException(Exception e, UnparsedPresence presence) throws Exception {
     }
 }

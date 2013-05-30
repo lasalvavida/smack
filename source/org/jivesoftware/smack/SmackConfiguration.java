@@ -61,6 +61,7 @@ public final class SmackConfiguration {
     private static int packetCollectorSize = 5000;
 
     private static ParsingExceptionCallback defaultCallback = new ThrowException();
+
     /**
      * This automatically enables EntityCaps for new connections if it is set to true
      */
@@ -331,10 +332,20 @@ public final class SmackConfiguration {
         autoEnableEntityCaps = b;
     }
 
+    /**
+     * Set the default parsing exception callback for all newly created connections
+     *
+     * @param callback
+     */
     public static void setDefaultParsingExceptionCallback(ParsingExceptionCallback callback) {
         defaultCallback = callback;
     }
 
+    /**
+     * Returns the default parsing exception callback
+     * 
+     * @return 
+     */
     public static ParsingExceptionCallback getDefaultParsingExceptionCallback() {
         return defaultCallback;
     }

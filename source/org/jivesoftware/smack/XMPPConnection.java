@@ -205,10 +205,21 @@ public class XMPPConnection extends Connection {
         return user;
     }
 
+    /**
+     * Install a parsing exception callback, which will be invoked once an exception is encountered while parsing a
+     * stanza
+     * 
+     * @param callback the callback to install
+     */
     public void setParsingExceptionCallback(ParsingExceptionCallback callback) {
         parsingExceptionCallback = callback;
     }
 
+    /**
+     * Get the current active parsing exception callback.
+     *  
+     * @return the active exception callback or null if there is none
+     */
     public ParsingExceptionCallback getParsingExceptionCallback() {
         return parsingExceptionCallback;
     }
