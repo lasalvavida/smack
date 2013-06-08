@@ -27,15 +27,25 @@ package org.jivesoftware.smack.parsing;
  * 
  */
 public class LogException extends ParsingExceptionCallback {
-    public void messageParsingException(Exception e) throws Exception {
-        System.err.print(e);
+
+    @Override
+    public void messageParsingException(Exception e, UnparsedMessage message) throws Exception {
+        System.err.print("Smack message parsing exception: " + e.getMessage());
+        e.printStackTrace();
+        System.err.println("Unparsed content: " + message.getContent());
     }
 
-    public void iqParsingException(Exception e) throws Exception {
-        System.err.print(e);
+    @Override
+    public void iqParsingException(Exception e, UnparsedIQ iq) throws Exception {
+        System.err.print("Smack iq parsing exception: " + e.getMessage());
+        e.printStackTrace();
+        System.err.println("Unparsed content: " + iq.getContent());
     }
 
-    public void presenceParsingException(Exception e) throws Exception {
-        System.err.print(e);
+    @Override
+    public void presenceParsingException(Exception e, UnparsedPresence presence) throws Exception {
+        System.err.print("Smack presence parsing exception: " + e.getMessage());
+        e.printStackTrace();
+        System.err.println("Unparsed content: " + presence.getContent());
     }
 }
