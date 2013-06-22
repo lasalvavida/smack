@@ -20,9 +20,11 @@
 
 package org.jivesoftware.smack.parsing;
 
+import org.jivesoftware.smack.ConnectionListener;
+
 /**
  * Parsing exception callback class that simply throws the encountered parsing exception. This usually leads to an
- * connectionClosedOnError disconnect of the connection.
+ * {@link ConnectionListener#connectionClosedOnError(Exception)} disconnect of the connection.
  * 
  * @author Florian Schmaus
  * 

@@ -48,7 +48,7 @@ public class UnparsedIQ extends IQ {
     /**
      * Retrieve the raw stanza data
      * 
-     * @return
+     * @return the raw stanza data
      */
     public String getContent() {
         return content;

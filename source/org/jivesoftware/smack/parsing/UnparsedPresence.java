@@ -53,7 +53,7 @@ public class UnparsedPresence extends Presence {
     /**
      * Retrieve the raw stanza data
      * 
-     * @return
+     * @return the raw stanza data
      */
     public String getContent() {
         return content;

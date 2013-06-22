@@ -21,10 +21,20 @@
 package org.jivesoftware.smack.parsing;
 
 /**
- * Base class to receive parsing exceptions
+ * Base class to receive parsing exceptions.
+ * 
+ * If this class is used as callback, then Smack will silently ignore the stanza that caused the parsing exception and
+ * place the parser after the faulty stanza.
+ * 
+ * Subclasses may or may not override certain methods of this class. Each of these methods will receive the exception
+ * that caused the parsing error and an instance of an Unparsed Packet type. The latter can be used to inspect the
+ * stanza that caused the parsing error by using the getContent() (for example {@link UnparsedIQ#getContent()})
+ * method.
+ * 
+ * Smack provides 2 predefined ParsingExceptionCallback's: {@link LogException} and {@link ThrowException}.
  * 
  * @author Florian Schmaus
- *
+ * 
  */
 public abstract class ParsingExceptionCallback {
 

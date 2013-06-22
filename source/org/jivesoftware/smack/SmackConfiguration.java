@@ -60,6 +60,10 @@ public final class SmackConfiguration {
     private static int localSocks5ProxyPort = 7777;
     private static int packetCollectorSize = 5000;
 
+    /**
+     * The default parsing exception callback is {@link ThrowException} which will
+     * throw an exception and therefore disconnect the active connection.
+     */
     private static ParsingExceptionCallback defaultCallback = new ThrowException();
 
     /**
@@ -336,6 +340,7 @@ public final class SmackConfiguration {
      * Set the default parsing exception callback for all newly created connections
      *
      * @param callback
+     * @see ParsingExceptionCallback
      */
     public static void setDefaultParsingExceptionCallback(ParsingExceptionCallback callback) {
         defaultCallback = callback;
@@ -344,7 +349,8 @@ public final class SmackConfiguration {
     /**
      * Returns the default parsing exception callback
      * 
-     * @return 
+     * @return the default parsing exception callback
+     * @see ParsingExceptionCallback
      */
     public static ParsingExceptionCallback getDefaultParsingExceptionCallback() {
         return defaultCallback;

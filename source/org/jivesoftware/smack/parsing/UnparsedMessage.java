@@ -48,7 +48,7 @@ public class UnparsedMessage extends Message {
     /**
      * Retrieve the raw stanza data
      * 
-     * @return
+     * @return the raw stanza data
      */
     public String getContent() {
         return content;
