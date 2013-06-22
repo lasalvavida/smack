@@ -28,6 +28,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
+import org.jivesoftware.smack.parsing.ParsingExceptionCallback;
+import org.jivesoftware.smack.parsing.ThrowException;
 import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
 
@@ -62,6 +64,12 @@ public final class SmackConfiguration {
      * defaultPingInterval (in seconds)
      */
     private static int defaultPingInterval = 1800; // 30 min (30*60)
+
+    /**
+     * The default parsing exception callback is {@link ThrowException} which will
+     * throw an exception and therefore disconnect the active connection.
+     */
+    private static ParsingExceptionCallback defaultCallback = new ThrowException();
 
     /**
      * This automatically enables EntityCaps for new connections if it is set to true
@@ -345,6 +353,11 @@ public final class SmackConfiguration {
         return autoEnableEntityCaps;
     }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> 0355636... SMACK-425 Introduced smack.parsing.ParsingExceptionCallback, a callback invoked when a exception is thrown while parsing a stanza. Smack is now able to either rethrow the exception ulitmatly causing a disconnect *or* log/ignore the exception and resume parsing after the faulty stanza.
     /**
      * Set if Entity Caps are enabled or disabled for every new connection
      * 
@@ -354,6 +367,30 @@ public final class SmackConfiguration {
         autoEnableEntityCaps = b;
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Set the default parsing exception callback for all newly created connections
+     *
+     * @param callback
+     * @see ParsingExceptionCallback
+     */
+    public static void setDefaultParsingExceptionCallback(ParsingExceptionCallback callback) {
+        defaultCallback = callback;
+    }
+
+    /**
+     * Returns the default parsing exception callback
+     * 
+     * @return the default parsing exception callback
+     * @see ParsingExceptionCallback
+     */
+    public static ParsingExceptionCallback getDefaultParsingExceptionCallback() {
+        return defaultCallback;
+    }
+
+>>>>>>> SMACK-425 Introduced smack.parsing.ParsingExceptionCallback, a callback invoked when a exception is thrown while parsing a stanza. Smack is now able to either rethrow the exception ulitmatly causing a disconnect *or* log/ignore the exception and resume parsing after the faulty stanza.
+>>>>>>> 0355636... SMACK-425 Introduced smack.parsing.ParsingExceptionCallback, a callback invoked when a exception is thrown while parsing a stanza. Smack is now able to either rethrow the exception ulitmatly causing a disconnect *or* log/ignore the exception and resume parsing after the faulty stanza.
     private static void parseClassToLoad(XmlPullParser parser) throws Exception {
         String className = parser.nextText();
         // Attempt to load the class so that the class can get initialized
