@@ -1064,8 +1064,6 @@ public class XMPPConnection extends Connection {
         packetWriter.done = true;
         // Closes the connection temporary. A reconnection is possible
         shutdown(new Presence(Presence.Type.unavailable));
-        // Print the stack trace to help catch the problem
-        e.printStackTrace();
         // Notify connection listeners of the error.
         for (ConnectionListener listener : getConnectionListeners()) {
             try {
