@@ -513,7 +513,7 @@ public class ServiceDiscoveryManager {
     public DiscoverInfo discoverInfo(String entityID, String node) throws XMPPException {
         Connection connection = ServiceDiscoveryManager.this.connection.get();
         if (connection == null) throw new XMPPException("Connection instance already gc'ed");
-        
+
         // Discover the entity's info
         DiscoverInfo disco = new DiscoverInfo();
         disco.setType(IQ.Type.GET);
